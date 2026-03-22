@@ -8,6 +8,7 @@ export const useProductStore = defineStore("product", {
         productid:null,
         sizes:[],
         toppings:[],
+        categories: [],
         error: null
     }),
     actions: {
@@ -47,6 +48,15 @@ export const useProductStore = defineStore("product", {
             } catch (error) {
                 this.error = "Lỗi khi lấy dữ liệu size";
                 console.error("Lỗi khi lấy dữ liệu size:", this.error);
+            }
+        },
+        async fetchCategories() {
+            try {
+                const response = await axios.get(`${APIURL}/categories`);
+                this.categories = response.data;
+            } catch (error) {
+                this.error = "Lỗi khi lấy dữ liệu danh mục";
+                console.error("Lỗi khi lấy dữ liệu danh mục:", this.error);
             }
         },
         //phương thức ì trả về sản phẩm theo id

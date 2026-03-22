@@ -90,97 +90,95 @@
     {
       "id": 1,
       "tensp": "Trà sữa truyền thống",
-      "gia": 30000,
+      "gia": 320000,
       "category_id": 1,
-      "hinh": "trasua1.jpg"
+      "hinh": "mau.png",
+      "hinhPhu": ["mau1.png", "mau2.png", "mau3.png"]
     },
     {
       "id": 2,
       "tensp": "Trà sữa trân châu đường đen",
-      "gia": 35000,
+      "gia": 380000,
       "category_id": 1,
-      "hinh": "trasua2.jpg"
+      "hinh": "mau2-3.png",
+      "hinhPhu": ["mau2-1.png", "mau2-4.png", "mau2-2.png"]
     },
     {
       "id": 3,
       "tensp": "Cà phê sữa đá",
-      "gia": 25000,
+      "gia": 450000,
       "category_id": 2,
-      "hinh": "trasua3.jpg"
+      "hinh": "mau3-4.png",
+      "hinhPhu": ["mau3-1.png", "mau3-2.png", "mau3-3.png"]
     },
     {
       "id": 4,
       "tensp": "Nước ép cam",
-      "gia": 40000,
+      "gia": 520000,
       "category_id": 3,
-      "hinh": "trasua4.jpg"
+      "hinh": "mau4-4.png",
+      "hinhPhu": ["maun4-1.png", "mau4-2.png", "mau4-3.png"]
     },
     {
       "id": 5,
       "tensp": "Trà sữa matcha",
-      "gia": 35000,
+      "gia": 610000,
       "category_id": 1,
-      "hinh": "trasua5.jpg"
+      "hinh": "mau5-1.png",
+      "hinhPhu": ["maun5-2.png", "mau5-3.jpg", "mau5-4.jpg"]
     },
     {
       "id": 6,
       "tensp": "Trà sữa dâu tây",
-      "gia": 40000,
+      "gia": 680000,
       "category_id": 1,
-      "hinh": "trasua6.jpg"
+      "hinh": "mau6-1.jpg",
+      "hinhPhu": ["mau6-4.jpg", "mau6-2.jpg", "mau6-3.jpg"]
     },
     {
       "id": 7,
       "tensp": "Cà phê đen",
-      "gia": 20000,
+      "gia": 740000,
       "category_id": 2,
-      "hinh": "trasua7.jpg"
+      "hinh": "mau4-4.png",
+      "hinhPhu": ["maun4-1.png", "mau4-2.png", "mau4-3.png"]
     },
     {
       "id": 8,
       "tensp": "Nước ép táo",
-      "gia": 45000,
+      "gia": 890000,
       "category_id": 3,
-      "hinh": "trasua8.jpg"
+     "hinh": "mau4-4.png",
+      "hinhPhu": ["maun4-1.png", "mau4-2.png", "mau4-3.png"]
     }
   ],
   "sizes": [
     {
       "id": 1,
-      "tensize": "Nhỏ",
+      "tensize": "Classic",
       "price": 0
     },
     {
       "id": 2,
-      "tensize": "Vừa",
-      "price": 5000
-    },
-    {
-      "id": 3,
-      "tensize": "Lớn",
-      "price": 10000
+      "tensize": "VIP",
+      "price": 250000
     }
   ],
   "toppings": [
     {
       "id": 1,
-      "tentopping": "Trân châu đen",
-      "price": 5000
+      "tentopping": "Snack",
+      "price": 15000
     },
     {
       "id": 2,
-      "tentopping": "Trân châu trắng",
-      "price": 7000
+      "tentopping": "Nuoc ngot cac loai",
+      "price": 20000
     },
     {
       "id": 3,
-      "tentopping": "Pudding trứng",
-      "price": 8000
-    },
-    {
-      "id": 4,
-      "tentopping": "Thạch trái cây",
-      "price": 6000
+      "tentopping": "May choi game",
+      "price": 50000
     }
   ],
   "orders": [

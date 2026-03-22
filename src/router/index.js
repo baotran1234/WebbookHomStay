@@ -13,7 +13,7 @@ const routes = [
     
     {
         path: "/products",
-        name: "Products",
+        name: "ProductList",
         component: ProductList,
     },
     {
@@ -21,6 +21,11 @@ const routes = [
         name: "ProductDetail",
         component: ProductDetail,
         props: true,
+    },
+    {
+        path: "/cart",
+        name: "Cart",
+        component: HoaDonComponent,
     },
     {
         path: "/hoadon",
