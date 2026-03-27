@@ -4,7 +4,7 @@
       <div>
         <h4>NestStay Homestay</h4>
         <p>Dia chi: 123 Le Loi, Da Nang</p>
-        <p>Hotline: 0901 234 567</p>
+        <p>Hotline: 0912 345 678</p>
       </div>
 
       <div>

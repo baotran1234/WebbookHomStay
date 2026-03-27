@@ -1,6 +1,8 @@
 <template>
+  
   <div class="app-layout">
     <HeaderCom />
+    
     <main class="main-content">
       <router-view />
     </main>
@@ -27,7 +29,7 @@ export default {
   },
 };
 </script>
-
+<!-- json-server --watch db.json -->
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

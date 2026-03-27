@@ -23,17 +23,68 @@
 
     <div class="featured-wrap">
       <div class="section-head">
-        <h2>Phong noi bat</h2>
+        <h2>Phong sale</h2>
         <router-link to="/products">Xem tat ca</router-link>
       </div>
       <div class="featured-grid">
-        <article class="room-card" v-for="room in featuredRooms" :key="room.id" @click="goToDetail(room.id)">
+        <article class="room-card" v-for="room in saleRooms" :key="room.id" @click="goToDetail(room.id)">
           <img :src="getImageUrl(room.hinh)" :alt="room.tensp" />
           <div class="room-info">
+            <div class="room-top-row">
+              <span :class="['room-tag', roomTypeClass(room)]">{{ roomTypeLabel(room) }}</span>
+              <span class="sale-chip">Sale -10%</span>
+            </div>
+            <h3>{{ room.tensp }}</h3>
+            <p class="price">
+              {{ formatPrice(getSalePrice(room)) }} / đêm
+              <span class="old-price">{{ formatPrice(room.gia) }}</span>
+            </p>
+            <div class="actions">
+              <button type="button" @click.stop="addToCart(room, true)">Thêm vao gio hang</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <div class="featured-wrap vip-wrap">
+      <div class="section-head">
+        <h2>Phong VIP</h2>
+        <router-link to="/products">Xem tat ca</router-link>
+      </div>
+      <div class="featured-grid">
+        <article class="room-card" v-for="room in vipRooms" :key="`vip-${room.id}`" @click="goToDetail(room.id)">
+          <img :src="getImageUrl(room.hinh)" :alt="room.tensp" />
+          <div class="room-info">
+            <div class="room-top-row">
+              <span class="room-tag vip">VIP</span>
+            </div>
             <h3>{{ room.tensp }}</h3>
             <p class="price">{{ formatPrice(room.gia) }} / dem</p>
             <div class="actions">
-              <button type="button" @click.stop="addToCart(room)">Them vao gio hang</button>
+              <button type="button" @click.stop="addToCart(room, false)">Them vao gio hang</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <div class="featured-wrap classic-wrap">
+      <div class="section-head">
+        <h2>Phong Classic</h2>
+        <router-link to="/products">Xem tat ca</router-link>
+      </div>
+      <div class="featured-grid">
+        <article class="room-card" v-for="room in classicRooms" :key="`classic-${room.id}`" @click="goToDetail(room.id)">
+          <img :src="getImageUrl(room.hinh)" :alt="room.tensp" />
+          <div class="room-info">
+            <div class="room-top-row">
+              <span class="room-tag classic">Classic</span>
+            </div>
+            <h3>{{ room.tensp }}</h3>
+            <p class="price">{{ formatPrice(room.gia) }} / dem</p>
+            <div class="actions">
+              <button type="button" @click.stop="addToCart(room, false)">Them vao gio hang</button>
             </div>
           </div>
         </article>
@@ -72,7 +123,27 @@ const slides = [
   },
 ]
 
-const featuredRooms = computed(() => store.products.slice(0, 4))
+const saleRooms = computed(() => [...store.products].sort((a, b) => Number(b.id || 0) - Number(a.id || 0)).slice(0, 4))
+
+const vipRooms = computed(() =>
+  store.products
+    .filter((room) => Number(room.gia || 0) >= 600000)
+    .sort((a, b) => Number(b.gia || 0) - Number(a.gia || 0))
+    .slice(0, 4)
+)
+
+const classicRooms = computed(() =>
+  store.products
+    .filter((room) => Number(room.gia || 0) < 600000)
+    .sort((a, b) => Number(b.gia || 0) - Number(a.gia || 0))
+    .slice(0, 4)
+)
+
+const getSalePrice = (room) => Math.round(Number(room?.gia || 0) * 0.9)
+
+const roomTypeLabel = (room) => (Number(room?.gia || 0) >= 600000 ? 'VIP' : 'Classic')
+
+const roomTypeClass = (room) => (Number(room?.gia || 0) >= 600000 ? 'vip' : 'classic')
 
 const formatPrice = (value) => `${Number(value || 0).toLocaleString('vi-VN')} đ`
 
@@ -84,14 +155,16 @@ const getImageUrl = (image) => {
   }
 }
 
-const addToCart = (room) => {
+const addToCart = (room, useSale = true) => {
+  const finalPrice = useSale ? getSalePrice(room) : Number(room.gia || 0)
+
   cartStore.addToCart({
     id: room.id,
     name: room.tensp,
     image: room.hinh,
-    size: '1 dem',
+    size: roomTypeLabel(room),
     toppings: [],
-    price: Number(room.gia || 0),
+    price: finalPrice,
     quantity: 1,
   })
 }
@@ -197,6 +270,14 @@ onBeforeUnmount(() => {
   padding: 10px 20px 0;
 }
 
+.vip-wrap {
+  padding-top: 18px;
+}
+
+.classic-wrap {
+  padding-top: 18px;
+}
+
 .section-head {
   display: flex;
   align-items: center;
@@ -243,9 +324,49 @@ onBeforeUnmount(() => {
   color: #12273d;
 }
 
+.room-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.room-tag,
+.sale-chip {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.room-tag.vip {
+  background: #0f4d46;
+  color: #fff;
+}
+
+.room-tag.classic {
+  background: #e7f0fb;
+  color: #16324f;
+}
+
+.sale-chip {
+  background: #ffe8e3;
+  color: #b63a28;
+}
+
 .price {
   color: #c8432f;
   font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.old-price {
+  color: #8d9eb1;
+  font-size: 0.85rem;
+  text-decoration: line-through;
+  font-weight: 600;
 }
 
 .actions {

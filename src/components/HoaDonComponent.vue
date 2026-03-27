@@ -68,17 +68,18 @@
 
       <div class="actions">
         <button type="button" class="secondary" @click="goHome">Tiep tuc xem phong</button>
-        <button type="button" class="primary" :disabled="cartStore.cartItems.length === 0">Xac nhan dat phong</button>
+        <button type="button" class="primary" :disabled="cartStore.cartItems.length === 0" @click="confirmBooking">Xac nhan dat phong</button>
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { defineEmits, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 
+const emit = defineEmits(['confirm', 'close'])
 const router = useRouter()
 const cartStore = useCartStore()
 
@@ -106,6 +107,18 @@ const onQuantityInput = (index, event) => {
 
 const goHome = () => {
   router.push('/')
+}
+
+const confirmBooking = () => {
+  const bookingData = {
+    customer: { ...customer },
+    paymentMethod: paymentMethod.value,
+    items: [...cartStore.cartItems],
+    totalAmount: cartStore.totalAmount,
+  }
+
+  emit('confirm', bookingData)
+  emit('close')
 }
 
 onMounted(() => {

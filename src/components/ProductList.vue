@@ -32,7 +32,7 @@
           <img :src="getImageUrl(room.hinh)" :alt="room.tensp" />
           <div class="room-content">
             <h3>{{ room.tensp }}</h3>
-            <p class="room-price">{{ formatPrice(room.gia) }} / dem</p>
+            <p class="room-price">{{ formatPrice(room.gia) }} / đêm </p>
             <div class="card-actions">
               <button type="button" @click.stop="addToCart(room)">Them vao gio hang</button>
             </div>
@@ -77,7 +77,7 @@ const addToCart = (room) => {
     id: room.id,
     name: room.tensp,
     image: room.hinh,
-    size: '1 dem',
+    size: '1 đêm',
     toppings: [],
     price: Number(room.gia || 0),
     quantity: 1,

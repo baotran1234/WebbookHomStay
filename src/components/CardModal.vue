@@ -25,7 +25,7 @@
       <button class="cart-modal-close" @click="close" >Đóng</button>
       <button v-if="props.carItems.length" class="cart-modal-pay" @click="showBill=true">Thanh Toán</button>
     </div>
-    <HoaDonComponent v-if="showBill" :cartItems="props.carItems" @close="onHoaDonClose" />
+    <HoaDonComponent v-if="showBill" :cartItems="props.carItems" @close="onHoaDonClose" @confirm="onHoaDonConfirm" />
   </div>
 </template>
 
@@ -113,6 +113,21 @@ function onHoaDonClose()
 {
   showBill.value=false
   close();
+}
+
+function onHoaDonConfirm(bookingData)
+{
+  const order = {
+    ...bookingData,
+    id: Date.now(),
+    createdAt: new Date().toISOString(),
+  };
+
+  const oldOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+  oldOrders.push(order);
+  localStorage.setItem('orders', JSON.stringify(oldOrders));
+
+  emit('update:carItems', []);
 }
 </script>
 

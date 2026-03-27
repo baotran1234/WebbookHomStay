@@ -46,8 +46,8 @@ export const useProductStore = defineStore("product", {
                 const response = await axios.get(`${APIURL}/sizes`);//resonse là trả về dữ liệu từ json server, lấy dữ liệu từ APIURL/products
                 this.sizes = response.data;
             } catch (error) {
-                this.error = "Lỗi khi lấy dữ liệu size";
-                console.error("Lỗi khi lấy dữ liệu size:", this.error);
+                this.error = "Lỗi khi lấy dữ liệu  hạn phòng";
+                console.error("Lỗi khi lấy dữ liệu hạn phòng:", this.error);
             }
         },
         async fetchCategories() {
@@ -65,8 +65,8 @@ export const useProductStore = defineStore("product", {
                 const response = await axios.get(`${APIURL}/toppings`);
                 this.toppings = response.data;
             } catch (error) {
-                this.error = "Lỗi khi lấy dữ liệu topping";
-                console.error("Lỗi khi lấy dữ liệu topping:", this.error);
+                this.error = "Lỗi khi lấy dữ liệu mức thời gian";
+                console.error("Lỗi khi lấy dữ liệu  mức thờ gian:", this.error);
             }
 
         }

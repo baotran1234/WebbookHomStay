@@ -1,4 +1,5 @@
 {
+  
   "users": [
     {
       "id": 1,
@@ -75,7 +76,7 @@
   "categories": [
     {
       "id": 1,
-      "tendm": "Trà sữa"
+      "tendm": "hồng pastel"
     },
     {
       "id": 2,
@@ -83,13 +84,13 @@
     },
     {
       "id": 3,
-      "tendm": "Nước ép"
+      "tendm": "đen đá"
     }
   ],
   "products": [
     {
       "id": 1,
-      "tensp": "Trà sữa truyền thống",
+      "tensp":  "Mê 01 Phòng Master",
       "gia": 320000,
       "category_id": 1,
       "hinh": "mau.png",
@@ -97,7 +98,7 @@
     },
     {
       "id": 2,
-      "tensp": "Trà sữa trân châu đường đen",
+      "tensp": "Mê 02 Phòng Master",
       "gia": 380000,
       "category_id": 1,
       "hinh": "mau2-3.png",
@@ -105,7 +106,7 @@
     },
     {
       "id": 3,
-      "tensp": "Cà phê sữa đá",
+      "tensp": "Mê 03 Phòng Master",
       "gia": 450000,
       "category_id": 2,
       "hinh": "mau3-4.png",
@@ -113,23 +114,23 @@
     },
     {
       "id": 4,
-      "tensp": "Nước ép cam",
+      "tensp": " Si01 + có bồn tắm+có máy chiếu+ có ban công ",
       "gia": 520000,
       "category_id": 3,
       "hinh": "mau4-4.png",
-      "hinhPhu": ["maun4-1.png", "mau4-2.png", "mau4-3.png"]
+      "hinhPhu": ["mau4-1.png", "mau4-2.png", "mau4-3.png"]
     },
     {
       "id": 5,
-      "tensp": "Trà sữa matcha",
+      "tensp": "Si02 + có bồn tắm+có máy chiếu+ có ban công",
       "gia": 610000,
       "category_id": 1,
       "hinh": "mau5-1.png",
-      "hinhPhu": ["maun5-2.png", "mau5-3.jpg", "mau5-4.jpg"]
+      "hinhPhu": ["mau5-3.jpg","mau5-2.png", "mau5-4.jpg"]
     },
     {
       "id": 6,
-      "tensp": "Trà sữa dâu tây",
+      "tensp": "Si03 + NVS riêng+có máy chiếu+ có cửa sổ",
       "gia": 680000,
       "category_id": 1,
       "hinh": "mau6-1.jpg",
@@ -137,19 +138,19 @@
     },
     {
       "id": 7,
-      "tensp": "Cà phê đen",
+      "tensp": "Si04 + NVS riêng+có máy chiếu+ có cửa sổ",
       "gia": 740000,
       "category_id": 2,
       "hinh": "mau4-4.png",
-      "hinhPhu": ["maun4-1.png", "mau4-2.png", "mau4-3.png"]
+      "hinhPhu": ["mau4-1.png", "mau4-2.png", "mau4-3.png"]
     },
     {
       "id": 8,
-      "tensp": "Nước ép táo",
+      "tensp": "Si05 + có bồn tắm+có máy chiếu+ có ban công",
       "gia": 890000,
       "category_id": 3,
      "hinh": "mau4-4.png",
-      "hinhPhu": ["maun4-1.png", "mau4-2.png", "mau4-3.png"]
+      "hinhPhu": ["mau4-1.png", "mau4-2.png", "mau4-3.png"]
     }
   ],
   "sizes": [
@@ -167,18 +168,52 @@
   "toppings": [
     {
       "id": 1,
-      "tentopping": "Snack",
-      "price": 15000
+      "tentopping": "3 tiếng",
+      "price": 350000
     },
     {
       "id": 2,
-      "tentopping": "Nuoc ngot cac loai",
-      "price": 20000
+      "tentopping": "4 tiếng",
+      "price": 390000
     },
     {
       "id": 3,
-      "tentopping": "May choi game",
-      "price": 50000
+      "tentopping": "Quá đêm (09h hôm sau)",
+      "price": 495000
+    },
+    {
+      "id": 4,
+      "tentopping": "Ban ngày (10h - 18h cùng ngày)",
+      "price": 550000
+    },
+    {
+      "id": 5,
+      "tentopping": "2ND từ (15h - 13h hôm sau)",
+      "price": 820000
+    },
+    {
+      "id": 6,
+      "tentopping": "Người thứ 3 phụ thu",
+      "price": 180000
+    },
+    {
+      "id": 7,
+      "tentopping": "Book chụp hình tối đa 4 người",
+      "price": 180000
+    }
+  ],
+  "utilities": [
+    {
+      "id": 1,
+      "tenutility": "Máy chiếu (xem được cả ngày và đêm), máy lạnh, tivi"
+    },
+    {
+      "id": 2,
+      "tenutility": "Nhà tắm dùng trong toilet riêng trong phòng"
+    },
+    {
+      "id": 3,
+      "tenutility": "Ăn siêu tắc, bàn ăn lớn uống, 2 chủ nước sủi"
     }
   ],
   "orders": [

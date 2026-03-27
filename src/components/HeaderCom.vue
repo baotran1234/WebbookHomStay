@@ -5,8 +5,8 @@
 
       <nav class="main-nav">
         <router-link to="/">Trang chu</router-link>
-        <router-link to="/products">San pham</router-link>
-        <router-link to="/cart">Gio hang</router-link>
+        <router-link to="/products">Loại Phòng</router-link>
+       
         <button type="button" class="login-btn">Dang nhap</button>
       </nav>
 
@@ -22,7 +22,7 @@
           <circle cx="9" cy="19" r="1.5" fill="currentColor" />
           <circle cx="17" cy="19" r="1.5" fill="currentColor" />
         </svg>
-        <span class="cart-label">Dat phong</span>
+        <span class="cart-label">Phòng đã đặt </span>
         <span class="cart-quantity">{{ cartStore.totalQuantity }}</span>
       </button>
     </div>
