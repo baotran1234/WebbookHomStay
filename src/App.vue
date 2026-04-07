@@ -35,7 +35,9 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  color: #e6ecf8;
+  background: radial-gradient(circle at top, #161a24 0%, #0a0b10 55%, #050507 100%);
+  min-height: 100vh;
 }
 
 * {
@@ -44,6 +46,8 @@ export default {
 
 body {
   margin: 0;
+  background: #050507;
+  color: #e6ecf8;
 }
 
 .app-layout {

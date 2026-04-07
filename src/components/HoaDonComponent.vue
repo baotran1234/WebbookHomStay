@@ -10,11 +10,38 @@
         </label>
         <label>
           Email
-          <input v-model="customer.email" type="email" placeholder="Nhap email" />
+          <input
+            v-model.trim="customer.email"
+            :class="{ invalid: errors.email }"
+            type="email"
+            placeholder="Nhap email"
+            required
+            pattern="^[^\\s@]+@gmail\\.com$"
+            @input="validateField('email')"
+            @blur="validateField('email')"
+          />
+          <small v-if="errors.email" class="field-error">{{ errors.email }}</small>
         </label>
         <label>
           So dien thoai
-          <input v-model="customer.phone" type="tel" placeholder="Nhap so dien thoai" />
+          <div class="phone-row">
+            <select v-model="customer.countryCode" class="country-code">
+              <option v-for="code in countryCodes" :key="code" :value="code">{{ code }}</option>
+            </select>
+            <input
+              v-model="customer.phone"
+              :class="{ invalid: errors.phone }"
+              type="tel"
+              placeholder="Nhap so dien thoai"
+              inputmode="numeric"
+              minlength="9"
+              maxlength="11"
+              required
+              @input="onPhoneInput"
+              @blur="validateField('phone')"
+            />
+          </div>
+          <small v-if="errors.phone" class="field-error">{{ errors.phone }}</small>
         </label>
         <label>
           Dia chi
@@ -75,20 +102,28 @@
 </template>
 
 <script setup>
-import { defineEmits, onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 
-const emit = defineEmits(['confirm', 'close'])
 const router = useRouter()
 const cartStore = useCartStore()
+const PAYMENT_PENDING_KEY = 'pendingBooking'
+const PAYMENT_SUCCESS_KEY = 'paymentSuccessBooking'
 
 const paymentMethod = ref('cash')
+const countryCodes = ['+84', '+1', '+44', '+61', '+65', '+81', '+82', '+86']
 const customer = reactive({
   name: '',
   email: '',
+  countryCode: '+84',
   phone: '',
   address: '',
+})
+
+const errors = reactive({
+  email: '',
+  phone: '',
 })
 
 const getImageUrl = (image) => {
@@ -105,20 +140,87 @@ const onQuantityInput = (index, event) => {
   cartStore.updateQuantity(index, Number(event.target.value))
 }
 
+const validateEmail = () => {
+  const email = String(customer.email || '').trim().toLowerCase()
+  if (!email) {
+    errors.email = 'Email la bat buoc.'
+    return false
+  }
+
+  if (!/^[^\s@]+@gmail\.com$/.test(email)) {
+    errors.email = 'Email phai dung dinh dang ...@gmail.com'
+    return false
+  }
+
+  errors.email = ''
+  return true
+}
+
+const validatePhone = () => {
+  const digits = String(customer.phone || '').replace(/\D/g, '')
+
+  if (!digits) {
+    errors.phone = 'So dien thoai la bat buoc.'
+    return false
+  }
+
+  if (digits.length < 9 || digits.length > 11) {
+    errors.phone = 'So dien thoai phai tu 9 den 11 so.'
+    return false
+  }
+
+  errors.phone = ''
+  return true
+}
+
+const validateField = (field) => {
+  if (field === 'email') return validateEmail()
+  if (field === 'phone') return validatePhone()
+  return true
+}
+
+const validateCustomer = () => {
+  const emailOk = validateEmail()
+  const phoneOk = validatePhone()
+  return emailOk && phoneOk
+}
+
+const onPhoneInput = (event) => {
+  customer.phone = String(event.target.value || '').replace(/\D/g, '')
+  validatePhone()
+}
+
 const goHome = () => {
   router.push('/')
 }
 
 const confirmBooking = () => {
+  if (!validateCustomer()) return
+
+  const normalizedPhone = String(customer.phone || '').replace(/\D/g, '')
+
   const bookingData = {
-    customer: { ...customer },
+    orderId: `ORD-${Date.now()}`,
+    customer: {
+      ...customer,
+      phone: normalizedPhone,
+      fullPhone: `${customer.countryCode}${normalizedPhone}`,
+    },
     paymentMethod: paymentMethod.value,
     items: [...cartStore.cartItems],
     totalAmount: cartStore.totalAmount,
+    createdAt: new Date().toISOString(),
   }
 
-  emit('confirm', bookingData)
-  emit('close')
+  if (paymentMethod.value === 'bank') {
+    localStorage.setItem(PAYMENT_PENDING_KEY, JSON.stringify(bookingData))
+    router.push('/payment')
+    return
+  }
+
+  localStorage.setItem(PAYMENT_SUCCESS_KEY, JSON.stringify(bookingData))
+  cartStore.clearCart()
+  router.push('/payment-success')
 }
 
 onMounted(() => {
@@ -128,7 +230,7 @@ onMounted(() => {
 
 <style scoped>
 .cart-page {
-  background: #f3f6fa;
+  background: radial-gradient(circle at top, #171b25 0%, #08090d 52%, #050507 100%);
   min-height: 100%;
 }
 
@@ -140,7 +242,7 @@ onMounted(() => {
 
 h1,
 h2 {
-  color: #10263b;
+  color: #eef4ff;
 }
 
 .customer-info {
@@ -153,31 +255,60 @@ h2 {
   display: flex;
   flex-direction: column;
   font-weight: 600;
-  color: #3d5063;
+  color: #c3d0e8;
   gap: 6px;
 }
 
 .customer-info input {
   height: 40px;
-  border: 1px solid #ced8e3;
+  border: 1px solid #2c3649;
   border-radius: 8px;
   padding: 0 10px;
+  background: #121722;
+  color: #e8efff;
+}
+
+.customer-info input.invalid {
+  border-color: #d9534f;
+}
+
+.phone-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 8px;
+}
+
+.country-code {
+  height: 40px;
+  border: 1px solid #2c3649;
+  border-radius: 8px;
+  padding: 0 8px;
+  background: #121722;
+  color: #e8efff;
+}
+
+.field-error {
+  color: #ff9d8d;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .cart-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 12px;
-  background: #fff;
+  background: #11151d;
+  border: 1px solid #242c3c;
   border-radius: 10px;
   overflow: hidden;
 }
 
 .cart-table th,
 .cart-table td {
-  border: 1px solid #e5ebf2;
+  border: 1px solid #252f42;
   padding: 10px;
   text-align: center;
+  color: #d8e2f4;
 }
 
 .cart-table th:nth-child(2),
@@ -187,12 +318,12 @@ h2 {
 
 .room-name {
   font-weight: 700;
-  color: #10263b;
+  color: #eef4ff;
 }
 
 .cart-table small {
   display: block;
-  color: #5e7084;
+  color: #9fafc9;
 }
 
 .cart-image {
@@ -205,7 +336,7 @@ h2 {
 .qty-wrap {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #d0d9e5;
+  border: 1px solid #2d384b;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -213,7 +344,8 @@ h2 {
 .qty-wrap button {
   width: 28px;
   border: none;
-  background: #f2f6fb;
+  background: #1b2230;
+  color: #e8efff;
   cursor: pointer;
 }
 
@@ -221,6 +353,8 @@ h2 {
   width: 56px;
   border: none;
   text-align: center;
+  background: #121722;
+  color: #e8efff;
 }
 
 .remove-btn {
@@ -246,7 +380,7 @@ h2 {
 }
 
 .summary strong {
-  color: #c8432f;
+  color: #ff9d8d;
 }
 
 .actions {
@@ -265,13 +399,14 @@ h2 {
 }
 
 .actions .secondary {
-  background: #e6edf5;
-  color: #10263b;
+  background: #151b27;
+  color: #f2b8de;
+  border: 1px solid #990066;
 }
 
 .actions .primary {
-  background: #1b6b60;
-  color: #fff;
+  background: #990066;
+  color: #ffe8f6;
 }
 
 .actions .primary:disabled {
@@ -281,11 +416,11 @@ h2 {
 
 .empty-cart {
   margin-top: 8px;
-  border: 1px dashed #cad6e2;
+  border: 1px dashed #2e3950;
   border-radius: 8px;
   padding: 14px;
-  color: #5a6d81;
-  background: #fff;
+  color: #a5b2c8;
+  background: #11151d;
 }
 
 @media (max-width: 900px) {

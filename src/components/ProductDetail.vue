@@ -299,7 +299,7 @@ watch(
 
 <style scoped>
 .detail-page {
-  background: #f3f6fa;
+  background: radial-gradient(circle at top, #171b25 0%, #08090d 52%, #050507 100%);
   padding: 18px 24px 36px;
 }
 
@@ -326,8 +326,8 @@ watch(
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
   border-radius: 12px;
-  border: 1px solid #d5deea;
-  box-shadow: 0 10px 24px rgba(16, 38, 59, 0.14);
+  border: 1px solid #2a3345;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.45);
 }
 
 .extra-gallery {
@@ -343,24 +343,24 @@ watch(
   object-fit: cover;
   object-position: center;
   border-radius: 8px;
-  border: 1px solid #d9e2ee;
+  border: 1px solid #2b3446;
   cursor: pointer;
   transition: box-shadow 0.16s ease, border-color 0.16s ease;
 }
 
 .extra-gallery img:hover {
-  border-color: #c0cedf;
-  box-shadow: 0 4px 10px rgba(16, 38, 59, 0.1);
+  border-color: #b30077;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
 }
 
 .extra-gallery img.active {
-  border-color: #1b6b60;
-  box-shadow: 0 0 0 2px rgba(27, 107, 96, 0.2);
+  border-color: #990066;
+  box-shadow: 0 0 0 2px rgba(153, 0, 102, 0.35);
 }
 
 .info-box h1 {
   margin-top: 0;
-  color: #10263b;
+  color: #eef4ff;
 }
 
 .info-box {
@@ -368,14 +368,14 @@ watch(
 }
 
 .price {
-  color: #c8432f;
+  color: #ff9d8d;
   font-size: 1.25rem;
   font-weight: 700;
   margin: 8px 0;
 }
 
 .desc {
-  color: #4d5f73;
+  color: #aebad0;
 }
 
 .selection,
@@ -386,7 +386,7 @@ watch(
 .selection label,
 .qty-wrap label {
   font-weight: 700;
-  color: #10263b;
+  color: #e8efff;
 }
 
 .options-row {
@@ -397,17 +397,18 @@ watch(
 }
 
 .chip {
-  border: 1px solid #c6d3e2;
+  border: 1px solid #2d384b;
   border-radius: 999px;
   padding: 7px 12px;
-  background: #fff;
+  background: #121722;
+  color: #e6eeff;
   cursor: pointer;
 }
 
 .chip.active {
-  color: #fff;
-  border-color: #1b6b60;
-  background: #1b6b60;
+  color: #ffe8f6;
+  border-color: #b30077;
+  background: #990066;
 }
 
 .addon-grid {
@@ -429,7 +430,7 @@ watch(
 
 .alternative-section label {
   font-weight: 700;
-  color: #10263b;
+  color: #e8efff;
 }
 
 .alternative-grid {
@@ -440,9 +441,9 @@ watch(
 }
 
 .alternative-card {
-  border: 1px solid #c9d5e5;
+  border: 1px solid #2a3345;
   border-radius: 12px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  background: linear-gradient(180deg, #141a25 0%, #0f131c 100%);
   padding: 9px;
   text-align: left;
   cursor: pointer;
@@ -454,8 +455,8 @@ watch(
 
 .alternative-card:hover {
   transform: translateY(-2px);
-  border-color: #1b6b60;
-  box-shadow: 0 10px 20px rgba(16, 38, 59, 0.12);
+  border-color: #990066;
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.42);
 }
 
 .alternative-card img {
@@ -468,20 +469,20 @@ watch(
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
   border-radius: 8px;
-  border: 1px solid #d8e1ee;
-  box-shadow: 0 8px 18px rgba(16, 38, 59, 0.1);
+  border: 1px solid #2f394c;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
   transition: box-shadow 0.2s ease;
 }
 
 .alternative-name {
-  color: #10263b;
+  color: #eaf1ff;
   font-size: 0.95rem;
   line-height: 1.35;
   font-weight: 700;
 }
 
 .alternative-price {
-  color: #c8432f;
+  color: #ff9d8d;
   font-size: 0.95rem;
   font-weight: 700;
 }
@@ -489,8 +490,8 @@ watch(
 .sale-badge {
   display: inline-flex;
   width: fit-content;
-  background: #1b6b60;
-  color: #fff;
+  background: #990066;
+  color: #ffe8f6;
   border-radius: 999px;
   padding: 3px 8px;
   font-size: 0.74rem;
@@ -499,16 +500,17 @@ watch(
 
 .date-input {
   min-height: 38px;
-  border: 1px solid #c6d3e2;
+  border: 1px solid #2d384b;
   border-radius: 8px;
   padding: 8px 10px;
-  color: #10263b;
+  color: #e8efff;
+  background: #121722;
 }
 
 .qty-control {
   margin-top: 8px;
   display: inline-flex;
-  border: 1px solid #d0d9e5;
+  border: 1px solid #2d384b;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -516,7 +518,8 @@ watch(
 .qty-control button {
   width: 36px;
   border: none;
-  background: #f2f6fb;
+  background: #1b2230;
+  color: #e8efff;
   cursor: pointer;
 }
 
@@ -524,6 +527,8 @@ watch(
   width: 60px;
   border: none;
   text-align: center;
+  background: #121722;
+  color: #e8efff;
 }
 
 .total {
@@ -532,7 +537,7 @@ watch(
 }
 
 .total strong {
-  color: #c8432f;
+  color: #ff9d8d;
 }
 
 .actions {
@@ -550,15 +555,15 @@ watch(
 }
 
 .actions .outline {
-  border: 1px solid #1b6b60;
-  color: #1b6b60;
-  background: #fff;
+  border: 1px solid #990066;
+  color: #f2b8de;
+  background: #151b27;
 }
 
 .actions .solid {
   border: none;
-  color: #fff;
-  background: #1b6b60;
+  color: #ffe8f6;
+  background: #990066;
 }
 
 @media (max-width: 900px) {

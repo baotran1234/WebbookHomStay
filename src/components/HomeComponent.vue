@@ -125,25 +125,28 @@ const slides = [
 
 const saleRooms = computed(() => [...store.products].sort((a, b) => Number(b.id || 0) - Number(a.id || 0)).slice(0, 4))
 
+const VIP_ROOM_IDS = [1, 2, 3]
+const isVipRoom = (room) => VIP_ROOM_IDS.includes(Number(room?.id || 0))
+
 const vipRooms = computed(() =>
   store.products
-    .filter((room) => Number(room.gia || 0) >= 600000)
-    .sort((a, b) => Number(b.gia || 0) - Number(a.gia || 0))
+    .filter((room) => isVipRoom(room))
+    .sort((a, b) => Number(a.id || 0) - Number(b.id || 0))
     .slice(0, 4)
 )
 
 const classicRooms = computed(() =>
   store.products
-    .filter((room) => Number(room.gia || 0) < 600000)
-    .sort((a, b) => Number(b.gia || 0) - Number(a.gia || 0))
+    .filter((room) => !isVipRoom(room))
+    .sort((a, b) => Number(a.id || 0) - Number(b.id || 0))
     .slice(0, 4)
 )
 
 const getSalePrice = (room) => Math.round(Number(room?.gia || 0) * 0.9)
 
-const roomTypeLabel = (room) => (Number(room?.gia || 0) >= 600000 ? 'VIP' : 'Classic')
+const roomTypeLabel = (room) => (isVipRoom(room) ? 'VIP' : 'Classic')
 
-const roomTypeClass = (room) => (Number(room?.gia || 0) >= 600000 ? 'vip' : 'classic')
+const roomTypeClass = (room) => (isVipRoom(room) ? 'vip' : 'classic')
 
 const formatPrice = (value) => `${Number(value || 0).toLocaleString('vi-VN')} đ`
 
@@ -187,7 +190,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .home-page {
-  background: #f3f6fa;
+  background: radial-gradient(circle at top, #171b25 0%, #08090d 52%, #050507 100%);
   padding-bottom: 36px;
 }
 
@@ -218,8 +221,8 @@ onBeforeUnmount(() => {
   right: 0;
   bottom: 0;
   padding: 24px;
-  color: #fff;
-  background: linear-gradient(transparent, rgba(8, 19, 32, 0.82));
+  color: #eef4ff;
+  background: linear-gradient(transparent, rgba(3, 5, 10, 0.92));
 }
 
 .kicker {
@@ -237,8 +240,9 @@ onBeforeUnmount(() => {
   display: inline-block;
   margin-top: 8px;
   text-decoration: none;
-  color: #10263b;
-  background: #f7e9cc;
+  color: #f7f9ff;
+  background: #990066;
+  border: 1px solid #b30077;
   border-radius: 999px;
   padding: 9px 14px;
   font-weight: 700;
@@ -256,12 +260,12 @@ onBeforeUnmount(() => {
   height: 10px;
   border-radius: 999px;
   border: none;
-  background: #aac0d5;
+  background: #5b6882;
   cursor: pointer;
 }
 
 .dot.active {
-  background: #10263b;
+  background: #990066;
 }
 
 .featured-wrap {
@@ -286,11 +290,11 @@ onBeforeUnmount(() => {
 
 .section-head h2 {
   margin: 0;
-  color: #12273d;
+  color: #f0f5ff;
 }
 
 .section-head a {
-  color: #12273d;
+  color: #f2b8de;
   font-weight: 700;
 }
 
@@ -302,10 +306,11 @@ onBeforeUnmount(() => {
 }
 
 .room-card {
-  background: #fff;
+  background: #11151d;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 8px 22px rgba(16, 38, 59, 0.08);
+  border: 1px solid #242c3c;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.42);
   cursor: pointer;
 }
 
@@ -321,7 +326,7 @@ onBeforeUnmount(() => {
 
 .room-info h3 {
   margin: 0;
-  color: #12273d;
+  color: #eaf1ff;
 }
 
 .room-top-row {
@@ -340,22 +345,22 @@ onBeforeUnmount(() => {
 }
 
 .room-tag.vip {
-  background: #0f4d46;
-  color: #fff;
+  background: #990066;
+  color: #ffe8f6;
 }
 
 .room-tag.classic {
-  background: #e7f0fb;
-  color: #16324f;
+  background: #2a2f3b;
+  color: #d8e3f8;
 }
 
 .sale-chip {
-  background: #ffe8e3;
-  color: #b63a28;
+  background: #4d2330;
+  color: #ffd5df;
 }
 
 .price {
-  color: #c8432f;
+  color: #ff9d8d;
   font-weight: 700;
   display: flex;
   align-items: baseline;
@@ -363,7 +368,7 @@ onBeforeUnmount(() => {
 }
 
 .old-price {
-  color: #8d9eb1;
+  color: #8b97ad;
   font-size: 0.85rem;
   text-decoration: line-through;
   font-weight: 600;
@@ -385,7 +390,7 @@ onBeforeUnmount(() => {
 }
 
 .actions button {
-  color: #fff;
-  background: #1b6b60;
+  color: #ffe8f6;
+  background: #990066;
 }
 </style>

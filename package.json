@@ -1,9 +1,13 @@
+
 {
   "name": "my-project",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "api": "json-server --watch db.json --port 3010",
+    "payment:backend": "set PAYMENT_PORT=4010&& node server/index.js",
+    "dev:full": "concurrently \"npm run serve\" \"npm run api\" \"npm run payment:backend\"",
+    "serve": "vue-cli-service serve --port 8080",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -20,8 +24,12 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.5",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3"
+    "eslint-plugin-vue": "^8.0.3",
+    "express": "^4.21.2",
+    "json-server": "^1.0.0-beta.3"
   },
   "eslintConfig": {
     "root": true,

@@ -91,7 +91,7 @@
     {
       "id": 1,
       "tensp":  "Mê 01 Phòng Master",
-      "gia": 320000,
+      "gia": 2000,
       "category_id": 1,
       "hinh": "mau.png",
       "hinhPhu": ["mau1.png", "mau2.png", "mau3.png"]

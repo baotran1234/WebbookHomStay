@@ -3,6 +3,8 @@ import HomeComponent from "@/components/HomeComponent.vue";
 import ProductList from "@/components/ProductList.vue";
 import ProductDetail from "@/components/ProductDetail.vue";
 import HoaDonComponent from "@/components/HoaDonComponent.vue";
+import PaymentPage from "@/components/PaymentPage.vue";
+import PaymentSuccess from "@/components/PaymentSuccess.vue";
 
 const routes = [
     {
@@ -31,6 +33,16 @@ const routes = [
         path: "/hoadon",
         name: "HoaDon",
         component: HoaDonComponent,
+    },
+    {
+        path: "/payment",
+        name: "Payment",
+        component: PaymentPage,
+    },
+    {
+        path: "/payment-success",
+        name: "PaymentSuccess",
+        component: PaymentSuccess,
     },
 ];
 // tạo 1 đối tượng ddeeer hiển thi nội dung

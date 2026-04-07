@@ -122,7 +122,7 @@ onMounted(async () => {
 
 <style scoped>
 .list-page {
-  background: #f3f6fa;
+  background: radial-gradient(circle at top, #171b25 0%, #08090d 52%, #050507 100%);
   min-height: 100%;
 }
 
@@ -134,7 +134,7 @@ onMounted(async () => {
 
 h1 {
   margin: 0 0 16px;
-  color: #10263b;
+  color: #eef4ff;
 }
 
 .toolbar {
@@ -147,10 +147,11 @@ h1 {
 .toolbar input,
 .toolbar select {
   height: 40px;
-  border: 1px solid #ced8e3;
+  border: 1px solid #2c3649;
   border-radius: 8px;
   padding: 0 10px;
-  background: #fff;
+  background: #121722;
+  color: #e8efff;
 }
 
 .room-grid {
@@ -160,10 +161,11 @@ h1 {
 }
 
 .room-card {
-  background: #fff;
+  background: #11151d;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 10px 22px rgba(16, 38, 59, 0.08);
+  border: 1px solid #242c3c;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.42);
   cursor: pointer;
 }
 
@@ -179,12 +181,12 @@ h1 {
 
 .room-content h3 {
   margin: 0;
-  color: #10263b;
+  color: #eaf1ff;
 }
 
 .room-price {
   margin: 6px 0 12px;
-  color: #c8432f;
+  color: #ff9d8d;
   font-weight: 700;
 }
 
@@ -206,13 +208,13 @@ h1 {
 }
 
 .card-actions button {
-  background: #1b6b60;
-  color: #fff;
+  background: #990066;
+  color: #ffe8f6;
 }
 
 .empty-note {
   margin-top: 14px;
-  color: #4c5d70;
+  color: #a5b2c8;
 }
 
 @media (max-width: 900px) {
