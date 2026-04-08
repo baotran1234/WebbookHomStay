@@ -5,6 +5,7 @@ import ProductDetail from "@/components/ProductDetail.vue";
 import HoaDonComponent from "@/components/HoaDonComponent.vue";
 import PaymentPage from "@/components/PaymentPage.vue";
 import PaymentSuccess from "@/components/PaymentSuccess.vue";
+import AdminDashboard from "@/components/AdminDashboard.vue";
 
 const routes = [
     {
@@ -43,6 +44,11 @@ const routes = [
         path: "/payment-success",
         name: "PaymentSuccess",
         component: PaymentSuccess,
+    },
+    {
+        path: "/admin",
+        name: "AdminDashboard",
+        component: AdminDashboard,
     },
 ];
 // tạo 1 đối tượng ddeeer hiển thi nội dung

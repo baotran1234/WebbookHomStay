@@ -7,7 +7,10 @@
           <p class="kicker">NESTSTAY HOMESTAY</p>
           <h1>{{ slide.title }}</h1>
           <p>{{ slide.subtitle }}</p>
-          <router-link to="/products" class="hero-cta">Kham pha phong</router-link>
+          <div class="hero-actions">
+            <router-link to="/products" class="hero-cta">Khám phá phòng</router-link>
+            <!-- <router-link to="/admin" class="hero-cta admin-cta">Đăng nhập quản trị</router-link> -->
+          </div>
         </div>
       </div>
       <div class="dots">
@@ -40,7 +43,7 @@
               <span class="old-price">{{ formatPrice(room.gia) }}</span>
             </p>
             <div class="actions">
-              <button type="button" @click.stop="addToCart(room, true)">Thêm vao gio hang</button>
+              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiet</button>
             </div>
           </div>
         </article>
@@ -62,7 +65,7 @@
             <h3>{{ room.tensp }}</h3>
             <p class="price">{{ formatPrice(room.gia) }} / dem</p>
             <div class="actions">
-              <button type="button" @click.stop="addToCart(room, false)">Them vao gio hang</button>
+              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiet</button>
             </div>
           </div>
         </article>
@@ -84,7 +87,7 @@
             <h3>{{ room.tensp }}</h3>
             <p class="price">{{ formatPrice(room.gia) }} / dem</p>
             <div class="actions">
-              <button type="button" @click.stop="addToCart(room, false)">Them vao gio hang</button>
+              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiet</button>
             </div>
           </div>
         </article>
@@ -97,10 +100,8 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
-import { useCartStore } from '@/stores/cart'
 
 const store = useProductStore()
-const cartStore = useCartStore()
 const router = useRouter()
 const activeSlide = ref(0)
 let sliderTimer = null
@@ -156,20 +157,6 @@ const getImageUrl = (image) => {
   } catch (error) {
     return ''
   }
-}
-
-const addToCart = (room, useSale = true) => {
-  const finalPrice = useSale ? getSalePrice(room) : Number(room.gia || 0)
-
-  cartStore.addToCart({
-    id: room.id,
-    name: room.tensp,
-    image: room.hinh,
-    size: roomTypeLabel(room),
-    toppings: [],
-    price: finalPrice,
-    quantity: 1,
-  })
 }
 
 const goToDetail = (id) => {
@@ -246,6 +233,17 @@ onBeforeUnmount(() => {
   border-radius: 999px;
   padding: 9px 14px;
   font-weight: 700;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-cta {
+  background: #183b6d;
+  border-color: #2b5f9c;
 }
 
 .dots {

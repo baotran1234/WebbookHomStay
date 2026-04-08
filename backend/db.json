@@ -1,5 +1,4 @@
 {
-  
   "users": [
     {
       "id": 1,
@@ -7,7 +6,13 @@
       "matkhau": "123456",
       "sodt": "0123456789",
       "email": "vana@gmail.com",
-      "diachi": "Hà Nội"
+      "diachi": "Hà Nội",
+      "username": "Nguyễn Văn A",
+      "phone": "0123456789",
+      "address": "Hà Nội",
+      "fullName": "Nguyễn Văn A",
+      "role": "user",
+      "passwordHash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
     },
     {
       "id": 2,
@@ -15,7 +20,13 @@
       "matkhau": "abcdef",
       "sodt": "0123456789",
       "email": "tranb@gmail.com",
-      "diachi": "Hồ Chí Minh"
+      "diachi": "Hồ Chí Minh",
+      "username": "Trần Thị B",
+      "phone": "0123456789",
+      "address": "Hồ Chí Minh",
+      "fullName": "Trần Thị B",
+      "role": "user",
+      "passwordHash": "bef57ec7f53a6d40beb640a780a639c83bc29ac8a9816f1fc6c5c6dcd93c4721"
     },
     {
       "id": 3,
@@ -23,7 +34,13 @@
       "matkhau": "matkhau123",
       "sodt": "0123456789",
       "email": "levanc@gmail.com",
-      "diachi": "Đà Nẵng"
+      "diachi": "Đà Nẵng",
+      "username": "Lê Văn C",
+      "phone": "0123456789",
+      "address": "Đà Nẵng",
+      "fullName": "Lê Văn C",
+      "role": "user",
+      "passwordHash": "fc8d5c17ee6bd893ac3d47583df509da68ada40070b9c9e1890cae52bc62de28"
     },
     {
       "name": "Trần anh tú",
@@ -31,7 +48,13 @@
       "password": "123456789",
       "sodt": "0123456789",
       "id": 4,
-      "diachi": "Hà Nội"
+      "diachi": "Hà Nội",
+      "username": "Trần anh tú",
+      "phone": "0123456789",
+      "address": "Hà Nội",
+      "fullName": "Trần anh tú",
+      "role": "user",
+      "passwordHash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225"
     },
     {
       "ten": "Trần anh hào",
@@ -39,7 +62,13 @@
       "matkhau": "123456789",
       "sodt": "0123456789",
       "id": 5,
-      "diachi": "Hà Nội"
+      "diachi": "Hà Nội",
+      "username": "Trần anh hào",
+      "phone": "0123456789",
+      "address": "Hà Nội",
+      "fullName": "Trần anh hào",
+      "role": "user",
+      "passwordHash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225"
     },
     {
       "ten": "tèo",
@@ -47,7 +76,13 @@
       "matkhau": "123456",
       "sodt": "1234567889",
       "id": 6,
-      "diachi": "Hà Nội"
+      "diachi": "Hà Nội",
+      "username": "tèo",
+      "phone": "1234567889",
+      "address": "Hà Nội",
+      "fullName": "tèo",
+      "role": "user",
+      "passwordHash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
     },
     {
       "ten": "bảo ngọc",
@@ -55,14 +90,24 @@
       "matkhau": "123456",
       "sodt": "090123456",
       "id": 7,
-      "diachi": "Hà Nội"
+      "diachi": "Hà Nội",
+      "username": "bảo ngọc",
+      "phone": "090123456",
+      "address": "Hà Nội",
+      "fullName": "bảo ngọc",
+      "role": "user",
+      "passwordHash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
     },
     {
       "name": "",
       "email": "chautrantrucly@gmail.com",
       "phone": "012345",
       "address": "",
-      "id": 8
+      "id": 8,
+      "username": "",
+      "fullName": "",
+      "role": "user",
+      "passwordHash": ""
     },
     {
       "fullname": "Nguyễn Hà Nam",
@@ -70,7 +115,34 @@
       "phone": "0907665355",
       "password": "$2b$10$1mcFhjCffegb2ub2Lx/hFeu0wtHdXyhxi/EnyvPjjeoQWV1YODESi",
       "createdAt": "2025-11-27T15:47:13.299Z",
-      "id": 9
+      "id": 9,
+      "username": "Nguyễn Hà Nam",
+      "address": "",
+      "fullName": "Nguyễn Hà Nam",
+      "role": "user",
+      "passwordHash": "b62a86fe6c6e07266a738b21ed8c40218b7d8cd8432ad416dbb44d6d13c4e694"
+    },
+    {
+      "id": 10,
+      "username": "admin",
+      "fullName": "Quản trị viên",
+      "email": "admin@gmail.com",
+      "phone": "0900000000",
+      "address": "Văn phòng",
+      "role": "admin",
+      "passwordHash": "e86f78a8a3caf0b60d8e74e5942aa6d86dc150cd3c03338aef25b7d2d7e3acc7",
+      "createdAt": "2026-04-07T23:42:49.896Z"
+    },
+    {
+      "id": 11,
+      "username": "ghjfhj",
+      "fullName": "jb,jnlk",
+      "email": "tranbao180305@gmail.com",
+      "phone": "0933390617",
+      "address": "87/112 khp4,Đ.số 3,bình tân, tphcm",
+      "role": "user",
+      "passwordHash": "26786e104caa9e1e2deadf371089f41b9e8a88370cdf02afeff72a28bc4dfbb9",
+      "createdAt": "2026-04-07T23:45:14.926Z"
     }
   ],
   "categories": [
@@ -90,11 +162,15 @@
   "products": [
     {
       "id": 1,
-      "tensp":  "Mê 01 Phòng Master",
+      "tensp": "Mê 01 Phòng Master",
       "gia": 2000,
       "category_id": 1,
       "hinh": "mau.png",
-      "hinhPhu": ["mau1.png", "mau2.png", "mau3.png"]
+      "hinhPhu": [
+        "mau1.png",
+        "mau2.png",
+        "mau3.png"
+      ]
     },
     {
       "id": 2,
@@ -102,7 +178,11 @@
       "gia": 380000,
       "category_id": 1,
       "hinh": "mau2-3.png",
-      "hinhPhu": ["mau2-1.png", "mau2-4.png", "mau2-2.png"]
+      "hinhPhu": [
+        "mau2-1.png",
+        "mau2-4.png",
+        "mau2-2.png"
+      ]
     },
     {
       "id": 3,
@@ -110,7 +190,11 @@
       "gia": 450000,
       "category_id": 2,
       "hinh": "mau3-4.png",
-      "hinhPhu": ["mau3-1.png", "mau3-2.png", "mau3-3.png"]
+      "hinhPhu": [
+        "mau3-1.png",
+        "mau3-2.png",
+        "mau3-3.png"
+      ]
     },
     {
       "id": 4,
@@ -118,7 +202,11 @@
       "gia": 520000,
       "category_id": 3,
       "hinh": "mau4-4.png",
-      "hinhPhu": ["mau4-1.png", "mau4-2.png", "mau4-3.png"]
+      "hinhPhu": [
+        "mau4-1.png",
+        "mau4-2.png",
+        "mau4-3.png"
+      ]
     },
     {
       "id": 5,
@@ -126,7 +214,11 @@
       "gia": 610000,
       "category_id": 1,
       "hinh": "mau5-1.png",
-      "hinhPhu": ["mau5-3.jpg","mau5-2.png", "mau5-4.jpg"]
+      "hinhPhu": [
+        "mau5-3.jpg",
+        "mau5-2.png",
+        "mau5-4.jpg"
+      ]
     },
     {
       "id": 6,
@@ -134,7 +226,11 @@
       "gia": 680000,
       "category_id": 1,
       "hinh": "mau6-1.jpg",
-      "hinhPhu": ["mau6-4.jpg", "mau6-2.jpg", "mau6-3.jpg"]
+      "hinhPhu": [
+        "mau6-4.jpg",
+        "mau6-2.jpg",
+        "mau6-3.jpg"
+      ]
     },
     {
       "id": 7,
@@ -142,15 +238,23 @@
       "gia": 740000,
       "category_id": 2,
       "hinh": "mau4-4.png",
-      "hinhPhu": ["mau4-1.png", "mau4-2.png", "mau4-3.png"]
+      "hinhPhu": [
+        "mau4-1.png",
+        "mau4-2.png",
+        "mau4-3.png"
+      ]
     },
     {
       "id": 8,
       "tensp": "Si05 + có bồn tắm+có máy chiếu+ có ban công",
       "gia": 890000,
       "category_id": 3,
-     "hinh": "mau4-4.png",
-      "hinhPhu": ["mau4-1.png", "mau4-2.png", "mau4-3.png"]
+      "hinh": "mau4-4.png",
+      "hinhPhu": [
+        "mau4-1.png",
+        "mau4-2.png",
+        "mau4-3.png"
+      ]
     }
   ],
   "sizes": [

@@ -9,7 +9,10 @@ const normalizeToppings = (toppings = []) => {
 const buildItemKey = (item) => {
   const sizePart = item.size ? String(item.size) : ''
   const toppingsPart = normalizeToppings(item.toppings).join(',')
-  return `${item.id}__${sizePart}__${toppingsPart}`
+  const datePart = item.bookingDate ? String(item.bookingDate) : ''
+  const startPart = item.startAt ? String(item.startAt) : ''
+  const endPart = item.endAt ? String(item.endAt) : ''
+  return `${item.id}__${sizePart}__${datePart}__${startPart}__${endPart}__${toppingsPart}`
 }
 
 export const useCartStore = defineStore('cart', {
@@ -51,6 +54,10 @@ export const useCartStore = defineStore('cart', {
         name: item.name,
         image: item.image,
         size: item.size || '',
+        bookingDate: item.bookingDate || '',
+        startAt: item.startAt || '',
+        endAt: item.endAt || '',
+        slotLabel: item.slotLabel || '',
         toppings: Array.isArray(item.toppings) ? item.toppings : [],
         price: Number(item.price || 0),
         quantity: Number(item.quantity || 1),

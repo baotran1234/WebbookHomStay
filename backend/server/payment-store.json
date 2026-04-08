@@ -1,0 +1,127 @@
+{
+  "payments": [
+    {
+      "paymentId": "PAY-1775577719144",
+      "orderId": "ORD-1775577719050",
+      "amount": 350000,
+      "currency": "VND",
+      "customer": {
+        "name": "bb",
+        "email": "tranbao180305@gmail.com",
+        "phone": "+840933390617"
+      },
+      "status": "pending",
+      "method": "bank_qr",
+      "provider": "vietqr",
+      "transferContent": "ORD-1775577719050",
+      "bankInfo": {
+        "bankCode": "MOMO",
+        "bankName": "MoMo",
+        "accountNo": "0933390617",
+        "accountName": "TRAN SANG BAO BAO"
+      },
+      "qrImageUrl": "https://img.vietqr.io/image/MOMO-0933390617-compact2.png?amount=350000&addInfo=ORD-1775577719050&accountName=TRAN%20SANG%20BAO%20BAO",
+      "createdAt": "2026-04-07T16:01:59.143Z",
+      "expiresAt": "2026-04-07T16:17:06.026Z",
+      "transactionId": null,
+      "raw": null,
+      "updatedAt": "2026-04-07T16:02:06.025Z",
+      "events": [
+        {
+          "at": "2026-04-07T16:01:59.144Z",
+          "type": "intent_created",
+          "source": "frontend"
+        },
+        {
+          "at": "2026-04-07T16:02:04.385Z",
+          "type": "intent_refreshed",
+          "source": "frontend"
+        },
+        {
+          "at": "2026-04-07T16:02:06.026Z",
+          "type": "intent_refreshed",
+          "source": "frontend"
+        }
+      ]
+    },
+    {
+      "paymentId": "PAY-1775577941455",
+      "orderId": "ORD-1775577941446",
+      "amount": 2000,
+      "currency": "VND",
+      "customer": {
+        "name": "ss",
+        "email": "tranbao180305@gmail.com",
+        "phone": "+840933390617"
+      },
+      "status": "pending",
+      "method": "bank_qr",
+      "provider": "vietqr",
+      "transferContent": "ORD-1775577941446",
+      "bankInfo": {
+        "bankCode": "MOMO",
+        "bankName": "MoMo",
+        "accountNo": "0933390617",
+        "accountName": "TRAN SANG BAO BAO"
+      },
+      "qrImageUrl": "https://img.vietqr.io/image/MOMO-0933390617-compact2.png?amount=2000&addInfo=ORD-1775577941446&accountName=TRAN%20SANG%20BAO%20BAO",
+      "createdAt": "2026-04-07T16:05:41.455Z",
+      "expiresAt": "2026-04-07T18:02:19.580Z",
+      "transactionId": null,
+      "raw": null,
+      "updatedAt": "2026-04-07T17:47:19.580Z",
+      "events": [
+        {
+          "at": "2026-04-07T16:05:41.455Z",
+          "type": "intent_created",
+          "source": "frontend"
+        },
+        {
+          "at": "2026-04-07T16:06:37.536Z",
+          "type": "intent_refreshed",
+          "source": "frontend"
+        },
+        {
+          "at": "2026-04-07T16:06:38.410Z",
+          "type": "intent_refreshed",
+          "source": "frontend"
+        },
+        {
+          "at": "2026-04-07T16:06:38.782Z",
+          "type": "intent_refreshed",
+          "source": "frontend"
+        },
+        {
+          "at": "2026-04-07T16:06:40.216Z",
+          "type": "intent_refreshed",
+          "source": "frontend"
+        },
+        {
+          "at": "2026-04-07T16:21:40.345Z",
+          "type": "payment_expired",
+          "source": "system"
+        },
+        {
+          "at": "2026-04-07T17:20:17.780Z",
+          "type": "intent_refreshed",
+          "source": "frontend"
+        },
+        {
+          "at": "2026-04-07T17:35:45.406Z",
+          "type": "payment_expired",
+          "source": "system"
+        },
+        {
+          "at": "2026-04-07T17:46:12.830Z",
+          "type": "intent_refreshed",
+          "source": "frontend"
+        },
+        {
+          "at": "2026-04-07T17:47:19.580Z",
+          "type": "intent_refreshed",
+          "source": "frontend"
+        }
+      ]
+    }
+  ]
+}

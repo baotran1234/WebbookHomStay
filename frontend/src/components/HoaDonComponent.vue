@@ -68,6 +68,8 @@
             <td><img :src="getImageUrl(item.image)" :alt="item.name" class="cart-image" /></td>
             <td>
               <div class="room-name">{{ item.name }}</div>
+              <small v-if="item.slotLabel">Khung giờ: {{ item.slotLabel }}</small>
+              <small v-if="item.bookingDate">Ngày vào: {{ item.bookingDate }}</small>
               <small v-if="item.size">Loai phong: {{ item.size }}</small>
               <small v-if="item.toppings && item.toppings.length">Tien ich: {{ item.toppings.join(', ') }}</small>
             </td>
@@ -102,14 +104,19 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const authStore = useAuthStore()
 const PAYMENT_PENDING_KEY = 'pendingBooking'
 const PAYMENT_SUCCESS_KEY = 'paymentSuccessBooking'
+const ADMIN_API_BASE = typeof window !== 'undefined'
+  ? `${window.location.protocol}//${window.location.hostname}:4010/api/admin`
+  : 'http://localhost:4010/api/admin'
 
 const paymentMethod = ref('cash')
 const countryCodes = ['+84', '+1', '+44', '+61', '+65', '+81', '+82', '+86']
@@ -125,6 +132,17 @@ const errors = reactive({
   email: '',
   phone: '',
 })
+
+const normalizeDigits = (value) => String(value || '').replace(/\D/g, '')
+
+const fillCustomerFromAuth = (user) => {
+  if (!user) return
+
+  customer.name = user.fullName || user.username || customer.name
+  customer.email = user.email || customer.email
+  customer.phone = normalizeDigits(user.phone || user.phoneNumber || customer.phone)
+  customer.address = user.address || customer.address
+}
 
 const getImageUrl = (image) => {
   try {
@@ -194,7 +212,32 @@ const goHome = () => {
   router.push('/')
 }
 
-const confirmBooking = () => {
+const upsertBookingToBackend = async (bookingData, paymentStatus) => {
+  const response = await fetch(`${ADMIN_API_BASE}/bookings`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      ...bookingData,
+      paymentStatus,
+    }),
+  })
+
+  let payload = null
+  try {
+    payload = await response.json()
+  } catch (_error) {
+    payload = null
+  }
+
+  return {
+    ok: response.ok,
+    payload,
+  }
+}
+
+const confirmBooking = async () => {
   if (!validateCustomer()) return
 
   const normalizedPhone = String(customer.phone || '').replace(/\D/g, '')
@@ -213,8 +256,30 @@ const confirmBooking = () => {
   }
 
   if (paymentMethod.value === 'bank') {
+    const created = await upsertBookingToBackend(bookingData, 'pending')
+    if (!created.ok) {
+      const message = created?.payload?.message || 'Khong the tao lich dat phong vi trung lich hoac loi server.'
+      const suggestions = Array.isArray(created?.payload?.suggestions) ? created.payload.suggestions : []
+      const suggestionText = suggestions.length > 0
+        ? `\nPhong de xuat: ${suggestions.map((item) => item.roomName).join(', ')}`
+        : ''
+      alert(`${message}${suggestionText}`)
+      return
+    }
+
     localStorage.setItem(PAYMENT_PENDING_KEY, JSON.stringify(bookingData))
     router.push('/payment')
+    return
+  }
+
+  const created = await upsertBookingToBackend(bookingData, 'success')
+  if (!created.ok) {
+    const message = created?.payload?.message || 'Khong the tao lich dat phong vi trung lich hoac loi server.'
+    const suggestions = Array.isArray(created?.payload?.suggestions) ? created.payload.suggestions : []
+    const suggestionText = suggestions.length > 0
+      ? `\nPhong de xuat: ${suggestions.map((item) => item.roomName).join(', ')}`
+      : ''
+    alert(`${message}${suggestionText}`)
     return
   }
 
@@ -225,7 +290,17 @@ const confirmBooking = () => {
 
 onMounted(() => {
   cartStore.loadFromStorage()
+  fillCustomerFromAuth(authStore.user)
 })
+
+watch(
+  () => authStore.user,
+  (user) => {
+    if (!user) return
+    fillCustomerFromAuth(user)
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>

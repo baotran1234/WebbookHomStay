@@ -1,21 +1,24 @@
 <template>
   <section class="payment-page">
     <div class="payment-card" v-if="booking">
-      <h1>Thanh toan bang chuyen khoan</h1>
-      <p class="subtitle">Vui long quet ma QR de thanh toan don dat phong cua ban.</p>
+      <h1>Thanh toan QR</h1>
+      <p class="subtitle">Quet ma QR va chuyen khoan dung noi dung de he thong doi soat tu dong.</p>
 
       <div class="payment-grid">
         <div class="qr-wrap">
-          <img :src="qrImage" alt="Ma QR thanh toan" class="qr-image" />
+          <img v-if="qrImage" :src="qrImage" alt="Ma QR thanh toan" class="qr-image" />
+          <p v-else class="qr-placeholder">Dang tao ma QR...</p>
         </div>
 
         <div class="payment-info">
-          <p><span>Ngan hang:</span> <strong>{{ BANK_INFO.bankName }}</strong></p>
-          <p><span>Chu tai khoan:</span> <strong>{{ BANK_INFO.accountName }}</strong></p>
-          <p><span>So tai khoan:</span> <strong>{{ BANK_INFO.accountNo }}</strong></p>
-          <p><span>Ma don hang:</span> <strong>{{ getOrderId() }}</strong></p>
+          <p><span>Ngan hang:</span> <strong>{{ bankInfo.bankName || 'Dang cap nhat' }}</strong></p>
+          <p><span>Chu tai khoan:</span> <strong>{{ bankInfo.accountName || 'Dang cap nhat' }}</strong></p>
+          <p><span>So tai khoan:</span> <strong>{{ bankInfo.accountNo || 'Dang cap nhat' }}</strong></p>
+          <p><span>Ma don hang:</span> <strong>{{ booking.orderId }}</strong></p>
+          <p><span>Ma thanh toan:</span> <strong>{{ paymentIntentId }}</strong></p>
           <p><span>So tien:</span> <strong>{{ formatPrice(booking.totalAmount) }}</strong></p>
-          <p><span>Noi dung CK:</span> <strong>{{ transferContent }}</strong></p>
+          <p><span>Noi dung CK:</span> <strong>{{ transferContent || booking.orderId }}</strong></p>
+          <p><span>Het han:</span> <strong>{{ expiresAtText }}</strong></p>
           <p><span>Khach hang:</span> <strong>{{ getCustomerName() }}</strong></p>
           <p><span>Email:</span> <strong>{{ getCustomerEmail() }}</strong></p>
           <p><span>So dien thoai:</span> <strong>{{ getCustomerPhone() }}</strong></p>
@@ -24,10 +27,11 @@
       </div>
 
       <div class="hint-box">
-        He thong dang cho callback/webhook tu ngan hang. Khi giao dich success va dung so tien, he thong se tu dong chuyen sang trang thanh toan thanh cong.
+        He thong dang cho webhook/xac nhan tu cong thanh toan. Neu giao dich dung so tien va dung ma don, trang thai se tu dong chuyen sang thanh cong.
       </div>
 
       <div class="actions">
+        <button type="button" class="primary" @click="refreshIntent">Lam moi QR</button>
         <button type="button" class="secondary" @click="goBackCart">Quay lai gio hang</button>
       </div>
     </div>
@@ -41,39 +45,33 @@ import { useCartStore } from '@/stores/cart'
 
 const PAYMENT_PENDING_KEY = 'pendingBooking'
 const PAYMENT_SUCCESS_KEY = 'paymentSuccessBooking'
-
-const PAYMENT_API_BASE = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:4010/api` : 'http://localhost:4010/api'
-
-const BANK_INFO = {
-  bankCode: 'MOMO',
-  bankName: 'MoMo',
-  accountNo: '0933390617',
-  accountName: 'TRAN SANG BAO BAO',
-}
+const PAYMENT_API_BASE = typeof window !== 'undefined'
+  ? `${window.location.protocol}//${window.location.hostname}:4010/api`
+  : 'http://localhost:4010/api'
+const ADMIN_API_BASE = typeof window !== 'undefined'
+  ? `${window.location.protocol}//${window.location.hostname}:4010/api/admin`
+  : 'http://localhost:4010/api/admin'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const booking = ref(null)
 const paymentStatus = ref('pending')
 const backendHealthy = ref(true)
+const paymentIntentId = ref('Dang tao')
+const transferContent = ref('')
+const qrImage = ref('')
+const bankInfo = ref({})
+const expiresAt = ref(null)
 let paymentWatcher = null
 
-const qrImage = computed(() => {
-  if (!booking.value) return ''
-
-  const amount = Number(booking.value.totalAmount || 0)
-  const accountName = encodeURIComponent(BANK_INFO.accountName)
-  const addInfo = encodeURIComponent(transferContent.value)
-
-  return `https://img.vietqr.io/image/${BANK_INFO.bankCode}-${BANK_INFO.accountNo}-compact2.png?amount=${amount}&addInfo=${addInfo}&accountName=${accountName}`
+const expiresAtText = computed(() => {
+  if (!expiresAt.value) return 'Dang cap nhat'
+  const date = new Date(expiresAt.value)
+  if (Number.isNaN(date.getTime())) return 'Dang cap nhat'
+  return date.toLocaleString('vi-VN')
 })
 
-const transferContent = computed(() => {
-  if (!booking.value?.orderId) return 'NESTSTAY-PAY'
-  return String(booking.value.orderId)
-})
-
-const formatPrice = (value) => `${Number(value || 0).toLocaleString('vi-VN')} đ`
+const formatPrice = (value) => `${Number(value || 0).toLocaleString('vi-VN')} d`
 
 const getCustomerName = () => {
   if (!booking.value || !booking.value.customer) return 'Khach le'
@@ -90,15 +88,11 @@ const getCustomerPhone = () => {
   return booking.value.customer.fullPhone || booking.value.customer.phone || 'Khong co'
 }
 
-const getOrderId = () => {
-  if (!booking.value) return 'Khong co'
-  return booking.value.orderId || 'Khong co'
-}
-
 const paymentStatusText = computed(() => {
   if (paymentStatus.value === 'success') return 'Thanh toan thanh cong'
+  if (paymentStatus.value === 'expired') return 'Ma QR het han. Vui long tao lai.'
   if (paymentStatus.value === 'invalid') return 'Giao dich khong hop le'
-  if (paymentStatus.value === 'waiting') return 'Dang cho xac nhan giao dich MoMo'
+  if (paymentStatus.value === 'waiting') return 'Dang cho xac nhan giao dich'
   if (!backendHealthy.value) return 'Khong ket noi duoc backend thanh toan'
   return 'Dang cho xac nhan giao dich'
 })
@@ -125,8 +119,19 @@ const finalizePayment = (transactionData) => {
   const successBooking = {
     ...booking.value,
     paymentTransaction: transactionData,
+    paymentIntentId: paymentIntentId.value,
     paymentStatus: 'success',
   }
+
+  fetch(`${ADMIN_API_BASE}/bookings/${encodeURIComponent(booking.value.orderId)}/payment`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      paymentStatus: 'success',
+    }),
+  }).catch(() => null)
 
   localStorage.setItem(PAYMENT_SUCCESS_KEY, JSON.stringify(successBooking))
   localStorage.removeItem(PAYMENT_PENDING_KEY)
@@ -134,6 +139,47 @@ const finalizePayment = (transactionData) => {
   paymentStatus.value = 'success'
   router.push('/payment-success')
   return true
+}
+
+const createPaymentIntent = async () => {
+  if (!booking.value) return
+
+  try {
+    const response = await fetch(`${PAYMENT_API_BASE}/payments/qr/intents`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        orderId: booking.value.orderId,
+        amount: Number(booking.value.totalAmount || 0),
+        customer: booking.value.customer || {},
+      }),
+    })
+
+    if (!response.ok) {
+      backendHealthy.value = false
+      return
+    }
+
+    const data = await response.json()
+    const payment = data?.payment || {}
+
+    paymentIntentId.value = payment.paymentId || 'Dang tao'
+    transferContent.value = payment.transferContent || booking.value.orderId
+    qrImage.value = payment.qrImageUrl || ''
+    bankInfo.value = payment.bankInfo || {}
+    expiresAt.value = payment.expiresAt || null
+    paymentStatus.value = payment.status === 'pending' ? 'waiting' : String(payment.status || 'waiting')
+    backendHealthy.value = true
+
+    localStorage.setItem(PAYMENT_PENDING_KEY, JSON.stringify({
+      ...booking.value,
+      paymentIntentId: paymentIntentId.value,
+    }))
+  } catch (_error) {
+    backendHealthy.value = false
+  }
 }
 
 const checkPaymentStatus = async () => {
@@ -148,6 +194,11 @@ const checkPaymentStatus = async () => {
 
     backendHealthy.value = true
     const transactionData = await response.json()
+    expiresAt.value = transactionData.expiresAt || expiresAt.value
+    qrImage.value = transactionData.qrImageUrl || qrImage.value
+    bankInfo.value = transactionData.bankInfo || bankInfo.value
+    transferContent.value = transactionData.transferContent || transferContent.value
+    paymentIntentId.value = transactionData.paymentId || paymentIntentId.value
 
     if (transactionData.status === 'success') {
       paymentStatus.value = 'success'
@@ -155,10 +206,20 @@ const checkPaymentStatus = async () => {
       return
     }
 
+    if (transactionData.status === 'expired') {
+      paymentStatus.value = 'expired'
+      return
+    }
+
     paymentStatus.value = transactionData.status === 'pending' ? 'waiting' : 'invalid'
-  } catch (error) {
+  } catch (_error) {
     backendHealthy.value = false
   }
+}
+
+const refreshIntent = async () => {
+  await createPaymentIntent()
+  await checkPaymentStatus()
 }
 
 const goBackCart = () => {
@@ -174,13 +235,13 @@ onMounted(() => {
 
   try {
     booking.value = JSON.parse(raw)
-  } catch (error) {
+  } catch (_error) {
     localStorage.removeItem(PAYMENT_PENDING_KEY)
     router.push('/cart')
     return
   }
 
-  checkPaymentStatus()
+  createPaymentIntent().then(checkPaymentStatus)
   paymentWatcher = setInterval(checkPaymentStatus, 2000)
 })
 
@@ -235,6 +296,13 @@ h1 {
   max-width: 320px;
   border-radius: 8px;
   display: block;
+}
+
+.qr-placeholder {
+  color: #2a3245;
+  font-weight: 700;
+  text-align: center;
+  padding: 32px 10px;
 }
 
 .payment-info {

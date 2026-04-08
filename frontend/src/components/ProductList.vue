@@ -34,7 +34,7 @@
             <h3>{{ room.tensp }}</h3>
             <p class="room-price">{{ formatPrice(room.gia) }} / đêm </p>
             <div class="card-actions">
-              <button type="button" @click.stop="addToCart(room)">Them vao gio hang</button>
+              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiet</button>
             </div>
           </div>
         </article>
@@ -51,10 +51,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
-import { useCartStore } from '@/stores/cart'
 
 const store = useProductStore()
-const cartStore = useCartStore()
 const router = useRouter()
 
 const keyword = ref('')
@@ -70,18 +68,6 @@ const getImageUrl = (image) => {
   } catch (error) {
     return ''
   }
-}
-
-const addToCart = (room) => {
-  cartStore.addToCart({
-    id: room.id,
-    name: room.tensp,
-    image: room.hinh,
-    size: '1 đêm',
-    toppings: [],
-    price: Number(room.gia || 0),
-    quantity: 1,
-  })
 }
 
 const goToDetail = (id) => {

@@ -47,19 +47,39 @@
           </div>
         </div>
 
-        <div class="selection" v-if="requiresDateRange">
-          <label>Ngay vao - ngay ra:</label>
+        <div class="selection">
+          <div class="slot-head">
+            <label>Ngay vao:</label>
+            <span class="slot-legend">Trạng thái: trắng là còn trống, đỏ là đã được giữ cho đến khi admin xác nhận đã trả phòng</span>
+          </div>
           <div class="options-row">
-            <input class="date-input" type="date" v-model="checkInDate" />
-            <input class="date-input" type="date" :min="checkInDate || undefined" v-model="checkOutDate" />
+            <input class="date-input" type="date" v-model="selectedDate" @change="refreshAvailability" />
           </div>
         </div>
 
-        <div class="selection" v-else>
-          <label>Ngay dat phong:</label>
-          <div class="options-row">
-            <input class="date-input" type="date" v-model="bookingDate" />
+        <div class="selection">
+          <div class="slot-head">
+            <label>Chon khung gio vao:</label>
+            <span class="slot-legend">{{ selectedPackageLabel }}</span>
           </div>
+          <p v-if="availabilityLoading" class="slot-note">Dang tai khung gio...</p>
+          <p v-else-if="availabilityError" class="slot-note error">{{ availabilityError }}</p>
+          <div class="slot-grid">
+            <button
+              v-for="slot in availableSlots"
+              :key="slot.startAt"
+              type="button"
+              :disabled="slot.occupied"
+              :aria-pressed="selectedSlotStartAt === slot.startAt"
+              :title="slot.title"
+              :class="['slot-card', { occupied: slot.occupied, selected: selectedSlotStartAt === slot.startAt }]"
+              @click="selectSlot(slot)"
+            >
+              <span class="slot-time">{{ slot.label }}</span>
+              <span class="slot-status">{{ slot.occupied ? 'Đang được giữ' : 'Còn trống' }}</span>
+            </button>
+          </div>
+          <p v-if="selectedSlotLabel" class="slot-picked">Đã chọn: {{ selectedSlotLabel }}</p>
         </div>
 
         <div class="selection">
@@ -120,13 +140,23 @@ const route = useRoute()
 const router = useRouter()
 const store = useProductStore()
 const cartStore = useCartStore()
+const ROOM_API_BASE = typeof window !== 'undefined'
+  ? `${window.location.protocol}//${window.location.hostname}:4010/api`
+  : 'http://localhost:4010/api'
+
+const todayKey = () => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+const selectedDate = ref(todayKey())
+const selectedSlot = ref(null)
+const availability = ref({ occupiedRanges: [] })
+const availabilityLoading = ref(false)
+const availabilityError = ref('')
 
 const selectedSize = ref(null)
 const selectedTopping = ref(null)
 const selectedSurcharges = ref([])
-const bookingDate = ref('')
-const checkInDate = ref('')
-const checkOutDate = ref('')
 const quantity = ref(1)
 const selectedImage = ref('')
 const defaultDetailImages = ['mau1.png', 'mau2.png', 'mau3.png']
@@ -191,9 +221,68 @@ const selectedTimePrice = computed(() => {
   return timePriceOptions.value.find((t) => String(t.id) === String(toppingId)) || firstTimePrice
 })
 
-const requiresDateRange = computed(() => {
-  const normalized = String(selectedTimePrice.value?.tentopping || '').toLowerCase()
-  return normalized.includes('quá đêm') || normalized.includes('ban ngày') || normalized.includes('2nd')
+const selectedPackageLabel = computed(() => selectedTimePrice.value?.tentopping || '3 tiếng')
+
+const selectedSlotStartAt = computed(() => selectedSlot.value?.startAt || '')
+const selectedSlotLabel = computed(() => selectedSlot.value?.label || '')
+
+const normalizePackageName = (value = '') => String(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
+const selectedPackageName = computed(() => normalizePackageName(selectedTimePrice.value?.tentopping || '3 tiếng'))
+
+const slotPlan = computed(() => {
+  const name = selectedPackageName.value
+  if (name.includes('qua dem')) {
+    return { durationMinutes: 13 * 60, startHours: [20] }
+  }
+  if (name.includes('ban ngay')) {
+    return { durationMinutes: 8 * 60, startHours: [10] }
+  }
+  if (name.includes('2nd')) {
+    return { durationMinutes: 22 * 60, startHours: [15] }
+  }
+  if (name.includes('4 tieng')) {
+    return { durationMinutes: 4 * 60, startHours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] }
+  }
+  return { durationMinutes: 3 * 60, startHours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21] }
+})
+
+const buildIsoAtTime = (dateKey, hour, minute = 0) => {
+  const paddedHour = String(hour).padStart(2, '0')
+  const paddedMinute = String(minute).padStart(2, '0')
+  return `${dateKey}T${paddedHour}:${paddedMinute}:00.000Z`
+}
+
+const formatClock = (isoString) => String(isoString || '').slice(11, 16)
+
+const addMinutesToIso = (isoString, minutes) => new Date(new Date(isoString).getTime() + minutes * 60000).toISOString()
+
+const isOverlap = (startA, endA, startB, endB) => {
+  const aStart = new Date(startA).getTime()
+  const aEnd = new Date(endA).getTime()
+  const bStart = new Date(startB).getTime()
+  const bEnd = new Date(endB).getTime()
+  return aStart < bEnd && bStart < aEnd
+}
+
+const availableSlots = computed(() => {
+  const occupiedRanges = Array.isArray(availability.value?.occupiedRanges) ? availability.value.occupiedRanges : []
+
+  return slotPlan.value.startHours.map((hour) => {
+    const startAt = buildIsoAtTime(selectedDate.value, hour, 0)
+    const endAt = addMinutesToIso(startAt, slotPlan.value.durationMinutes)
+    const matchedRange = occupiedRanges.find((range) => isOverlap(startAt, endAt, range.startAt, range.endAt))
+    const occupied = Boolean(matchedRange)
+    return {
+      label: `${String(hour).padStart(2, '0')}:00 - ${formatClock(endAt)}`,
+      startAt,
+      endAt,
+      occupied,
+      title: occupied
+        ? `Khung giờ này đang được giữ (${formatClock(matchedRange.startAt)} - ${formatClock(matchedRange.endAt)}). Chỉ mở lại khi admin xác nhận đã trả phòng.`
+        : 'Còn trống',
+    }
+  })
 })
 
 const toppingsTotal = computed(() => {
@@ -223,7 +312,44 @@ const changeQuantity = (delta) => {
   quantity.value = next
 }
 
+const refreshAvailability = async () => {
+  if (!store.productid?.id || !selectedDate.value) return
+
+  availabilityLoading.value = true
+  availabilityError.value = ''
+  try {
+    const response = await fetch(`${ROOM_API_BASE}/rooms/${encodeURIComponent(store.productid.id)}/availability?date=${encodeURIComponent(selectedDate.value)}`)
+    if (!response.ok) {
+      throw new Error('Khong tai duoc khung gio.')
+    }
+
+    const payload = await response.json()
+    availability.value = payload?.availability || { occupiedRanges: [] }
+
+    if (selectedSlot.value) {
+      const matched = availableSlots.value.find((slot) => slot.startAt === selectedSlot.value.startAt)
+      if (!matched || matched.occupied) {
+        selectedSlot.value = null
+      }
+    }
+  } catch (_error) {
+    availability.value = { occupiedRanges: [] }
+    availabilityError.value = 'Khong tai duoc khung gio. Vui long thu lai.'
+  } finally {
+    availabilityLoading.value = false
+  }
+}
+
+const selectSlot = (slot) => {
+  if (slot.occupied) return
+  selectedSlot.value = slot
+}
+
 const buildCartItem = () => {
+  if (!selectedSlot.value) {
+    return null
+  }
+
   const selectedSurchargeNames = surchargeOptions.value
     .filter((t) => selectedSurcharges.value.some((id) => String(id) === String(t.id)))
     .map((t) => t.tentopping)
@@ -233,9 +359,10 @@ const buildCartItem = () => {
     id: store.productid.id,
     name: store.productid.tensp,
     image: store.productid.hinh,
-    bookingDate: requiresDateRange.value ? null : bookingDate.value || null,
-    checkInDate: requiresDateRange.value ? checkInDate.value || null : null,
-    checkOutDate: requiresDateRange.value ? checkOutDate.value || null : null,
+    bookingDate: selectedDate.value,
+    startAt: selectedSlot.value.startAt,
+    endAt: selectedSlot.value.endAt,
+    slotLabel: selectedSlot.value.label,
     size: currentSize.value?.tensize || 'Tieu chuan',
     toppings: toppingNames,
     price: Number(totalPrice.value) / Math.max(1, Number(quantity.value || 1)),
@@ -243,32 +370,35 @@ const buildCartItem = () => {
   }
 }
 
-watch(requiresDateRange, (isRange) => {
-  if (isRange) {
-    bookingDate.value = ''
-    return
-  }
-
-  checkInDate.value = ''
-  checkOutDate.value = ''
-})
-
-const addToCart = () => {
+const addToCart = async () => {
   if (!store.productid) return
-  cartStore.addToCart(buildCartItem())
+  await refreshAvailability()
+  const item = buildCartItem()
+  if (!item) {
+    alert('Vui lòng chọn khung giờ trước khi thêm vào giỏ.')
+    return false
+  }
+  const latestSlot = availableSlots.value.find((slot) => slot.startAt === item.startAt)
+  if (!latestSlot || latestSlot.occupied) {
+    selectedSlot.value = null
+    alert('Khung giờ này vừa được đặt hoặc đang bị giữ. Vui lòng chọn khung giờ khác.')
+    return false
+  }
+  cartStore.addToCart(item)
+  return true
 }
 
-const buyNow = () => {
-  addToCart()
+const buyNow = async () => {
+  const added = await addToCart()
+  if (!added) return
   router.push({ name: 'Cart' })
 }
 
 const resetSelections = () => {
   selectedSize.value = null
   selectedSurcharges.value = []
-  bookingDate.value = ''
-  checkInDate.value = ''
-  checkOutDate.value = ''
+  selectedDate.value = todayKey()
+  selectedSlot.value = null
   quantity.value = 1
   selectedImage.value = ''
 }
@@ -277,6 +407,7 @@ const loadProductDetail = async (id) => {
   await Promise.all([store.fetchProductById(id), store.fetchSizes(), store.fetchToppings(), store.fetchProducts()])
   resetSelections()
   selectedTopping.value = timePriceOptions.value[0]?.id || null
+  await refreshAvailability()
 }
 
 const goToAlternativeRoom = async (id) => {
@@ -295,6 +426,18 @@ watch(
     await loadProductDetail(id)
   }
 )
+
+watch(
+  [() => store.productid?.id, selectedDate, selectedTopping],
+  async ([roomId]) => {
+    if (!roomId || !selectedDate.value) return
+    await refreshAvailability()
+  }
+)
+
+watch(selectedTopping, () => {
+  selectedSlot.value = null
+})
 </script>
 
 <style scoped>
@@ -421,6 +564,87 @@ watch(
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.slot-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.slot-legend,
+.slot-note {
+  color: #a8b8d3;
+  font-size: 12px;
+}
+
+.slot-note.error {
+  color: #ff9d8d;
+}
+
+.slot-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 10px;
+}
+
+.slot-card {
+  border: 1px solid #d6dce8;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #102033;
+  min-height: 68px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.slot-card:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #990066;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+}
+
+.slot-card.selected {
+  border-color: #0066cc;
+  background: linear-gradient(180deg, #1f5fbf 0%, #0f3d85 100%);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.35);
+  transform: translateY(-1px);
+}
+
+.slot-card.occupied {
+  background: #d9534f;
+  border-color: #d9534f;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.95;
+}
+
+.slot-card:disabled {
+  cursor: not-allowed;
+}
+
+.slot-time {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.slot-status {
+  font-size: 0.8rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.slot-picked {
+  margin: 10px 0 0;
+  color: #8cc1ff;
+  font-weight: 700;
 }
 
 .alternative-section {
@@ -586,6 +810,11 @@ watch(
 
   .alternative-card img {
     min-height: 176px;
+  }
+
+  .slot-head {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>
