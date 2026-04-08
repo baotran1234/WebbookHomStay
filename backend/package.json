@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "api": "json-server --watch db.json --port 3010",
-    "payment:dev": "cross-env PAYMENT_PORT=4010 node server/index.js"
+    "payment:dev": "node server/index.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -62,13 +62,18 @@ export const useAuthStore = defineStore('auth', {
     async register(payload) {
       this.loading = true
       try {
-        const response = await fetch(`${AUTH_API_BASE}/register`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        })
+        let response
+        try {
+          response = await fetch(`${AUTH_API_BASE}/register`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          })
+        } catch (_error) {
+          throw new Error('Không kết nối được backend đăng nhập/đăng ký ở cổng 4010. Hãy chạy backend rồi thử lại.')
+        }
         const data = await parseApiResponse(response)
         if (!response.ok) {
           throw new Error(data?.message || 'Đăng ký thất bại.')
@@ -82,13 +87,18 @@ export const useAuthStore = defineStore('auth', {
     async login(payload) {
       this.loading = true
       try {
-        const response = await fetch(`${AUTH_API_BASE}/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        })
+        let response
+        try {
+          response = await fetch(`${AUTH_API_BASE}/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          })
+        } catch (_error) {
+          throw new Error('Không kết nối được backend admin ở cổng 4010. Hãy chạy backend rồi thử lại.')
+        }
         const data = await parseApiResponse(response)
         if (!response.ok) {
           throw new Error(data?.message || 'Đăng nhập thất bại.')

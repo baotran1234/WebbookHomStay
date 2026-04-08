@@ -994,6 +994,30 @@ app.patch('/api/admin/bookings/:bookingId/status', (req, res) => {
   res.json({ ok: true, booking: updated })
 })
 
+app.delete('/api/admin/bookings/:bookingId', (req, res) => {
+  const bookingId = normalizeString(req.params.bookingId)
+  const store = readBookingStore()
+  const index = store.bookings.findIndex((item) => item.bookingId === bookingId)
+
+  if (index < 0) {
+    res.status(404).json({ ok: false, message: 'booking not found' })
+    return
+  }
+
+  const booking = store.bookings[index]
+  const canDelete = String(booking?.status || '').toLowerCase() === 'checked_out'
+    && String(booking?.paymentStatus || '').toLowerCase() === 'success'
+
+  if (!canDelete) {
+    res.status(400).json({ ok: false, message: 'booking is not eligible for deletion' })
+    return
+  }
+
+  store.bookings.splice(index, 1)
+  writeBookingStore(store)
+  res.json({ ok: true, bookingId })
+})
+
 app.get('/api/admin/bookings', (_req, res) => {
   const store = readBookingStore()
   const sorted = [...store.bookings].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())

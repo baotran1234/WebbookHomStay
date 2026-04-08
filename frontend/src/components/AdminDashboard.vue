@@ -143,6 +143,7 @@
                 <th>Từ giờ</th>
                 <th>Đến giờ</th>
                 <th>Trạng thái</th>
+                <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -152,6 +153,16 @@
                 <td>{{ formatDate(schedule.startAt) }}</td>
                 <td>{{ formatDate(schedule.endAt) }}</td>
                 <td>{{ toBookingStatusLabel(schedule.status) }} / {{ toPaymentStatusLabel(schedule.paymentStatus) }}</td>
+                <td>
+                  <button
+                    v-if="canDeleteBooking(schedule)"
+                    type="button"
+                    class="delete-btn"
+                    @click="deleteBooking(schedule.bookingId)"
+                  >
+                    Xóa
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -170,6 +181,7 @@
               <th>Thanh toán</th>
               <th>Trạng thái vận hành</th>
               <th>Cập nhật</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -190,6 +202,16 @@
                 </select>
               </td>
               <td>{{ formatDate(booking.updatedAt || booking.createdAt) }}</td>
+              <td>
+                <button
+                  v-if="canDeleteBooking(booking)"
+                  type="button"
+                  class="delete-btn"
+                  @click="deleteBooking(booking.bookingId)"
+                >
+                  Xóa
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -208,7 +230,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import AuthModal from '@/components/AuthModal.vue'
 import { useRouter } from 'vue-router'
@@ -223,6 +245,7 @@ const dashboard = ref(null)
 const bookings = ref([])
 const errorMessage = ref('')
 const showAuth = ref(false)
+let dashboardRefreshTimer = null
 const adminDate = ref((() => {
   const now = new Date()
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
@@ -314,6 +337,12 @@ const toBookingStatusLabel = (status) => {
   return map[String(status || '').toLowerCase()] || String(status || 'Không rõ')
 }
 
+const canDeleteBooking = (booking) => {
+  const status = String(booking?.status || '').toLowerCase()
+  const paymentStatus = String(booking?.paymentStatus || '').toLowerCase()
+  return status === 'checked_out' && paymentStatus === 'success'
+}
+
 const toPercent = (value, maxValue) => {
   if (!maxValue) return 0
   return Math.max(0, Math.min(100, (Number(value || 0) / Number(maxValue || 1)) * 100))
@@ -342,6 +371,30 @@ const loadDashboard = async () => {
   }
 }
 
+const refreshAdminIfNeeded = () => {
+  if (!auth.isAdmin) return
+  loadDashboard()
+}
+
+const startAutoRefresh = () => {
+  if (dashboardRefreshTimer) return
+  dashboardRefreshTimer = window.setInterval(() => {
+    if (document.visibilityState !== 'visible') return
+    refreshAdminIfNeeded()
+  }, 5000)
+}
+
+const stopAutoRefresh = () => {
+  if (!dashboardRefreshTimer) return
+  window.clearInterval(dashboardRefreshTimer)
+  dashboardRefreshTimer = null
+}
+
+const onVisibilityChange = () => {
+  if (document.visibilityState !== 'visible') return
+  refreshAdminIfNeeded()
+}
+
 const onStatusChange = async (bookingId, event) => {
   const status = event.target.value
   try {
@@ -364,6 +417,37 @@ const onStatusChange = async (bookingId, event) => {
   }
 }
 
+const deleteBooking = async (bookingId) => {
+  if (!window.confirm('Xóa booking này khỏi lịch sử?')) return
+
+  errorMessage.value = ''
+  try {
+    const response = await fetch(`${ADMIN_API_BASE}/bookings/${encodeURIComponent(bookingId)}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) {
+      let message = 'Xóa booking thất bại.'
+      try {
+        const payload = await response.json()
+        if (payload?.message) {
+          message = payload.message
+        }
+      } catch (_parseError) {
+        if (response.status === 404 || response.status === 405) {
+          message = 'Backend chưa cập nhật API xóa. Hãy restart server backend cổng 4010 rồi thử lại.'
+        }
+      }
+      errorMessage.value = message
+      return
+    }
+
+    await loadDashboard()
+  } catch (_error) {
+    errorMessage.value = 'Không kết nối được backend khi xóa booking.'
+  }
+}
+
 const openAdminLogin = () => {
   showAuth.value = true
 }
@@ -381,6 +465,17 @@ const onAuthSuccess = (payload) => {
 onMounted(() => {
   if (auth.isAdmin) {
     loadDashboard()
+  }
+  startAutoRefresh()
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', onVisibilityChange)
+  }
+})
+
+onBeforeUnmount(() => {
+  stopAutoRefresh()
+  if (typeof document !== 'undefined') {
+    document.removeEventListener('visibilitychange', onVisibilityChange)
   }
 })
 </script>
@@ -632,6 +727,20 @@ onMounted(() => {
   color: #e9f0ff;
   border-radius: 6px;
   padding: 6px 8px;
+}
+
+.delete-btn {
+  background: #3a1518;
+  border: 1px solid #d9534f;
+  color: #ffe0de;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #552024;
 }
 
 @media (max-width: 900px) {

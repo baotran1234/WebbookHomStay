@@ -165,43 +165,8 @@
       ]
     },
     {
-      "bookingId": "BKG-1775608587939-763",
-      "orderId": "ORD-1775608587933",
-      "customer": {
-        "name": "jb,jnlk",
-        "email": "tranbao180305@gmail.com",
-        "phone": "+840933390617",
-        "address": "87/112 khp4,Đ.số 3,bình tân, tphcm"
-      },
-      "paymentMethod": "cash",
-      "paymentStatus": "success",
-      "status": "checked_out",
-      "totalAmount": 550000,
-      "createdAt": "2026-04-08T00:36:27.933Z",
-      "updatedAt": "2026-04-08T01:02:34.327Z",
-      "items": [
-        {
-          "lineId": "ORD-1775608587933-1",
-          "roomId": 6,
-          "roomName": "Si03 + NVS riêng+có máy chiếu+ có cửa sổ",
-          "quantity": 1,
-          "unitPrice": 550000,
-          "amount": 550000,
-          "size": "Classic",
-          "toppings": [
-            "Ban ngày (10h - 18h cùng ngày)"
-          ],
-          "bookingDate": "2026-04-08",
-          "checkInDate": null,
-          "checkOutDate": null,
-          "startAt": "2026-04-08T14:00:00.000Z",
-          "endAt": "2026-04-09T12:00:00.000Z"
-        }
-      ]
-    },
-    {
-      "bookingId": "BKG-1775609490004-640",
-      "orderId": "ORD-1775609490000",
+      "bookingId": "BKG-1775612013517-670",
+      "orderId": "ORD-1775612013510",
       "customer": {
         "name": "jb,jnlk",
         "email": "tranbao180305@gmail.com",
@@ -212,11 +177,11 @@
       "paymentStatus": "success",
       "status": "checked_out",
       "totalAmount": 350000,
-      "createdAt": "2026-04-08T00:51:30.000Z",
-      "updatedAt": "2026-04-08T01:02:29.367Z",
+      "createdAt": "2026-04-08T01:33:33.510Z",
+      "updatedAt": "2026-04-08T01:47:00.217Z",
       "items": [
         {
-          "lineId": "ORD-1775609490000-1",
+          "lineId": "ORD-1775612013510-1",
           "roomId": 6,
           "roomName": "Si03 + NVS riêng+có máy chiếu+ có cửa sổ",
           "quantity": 1,
@@ -229,14 +194,14 @@
           "bookingDate": "2026-04-08",
           "checkInDate": null,
           "checkOutDate": null,
-          "startAt": "2026-04-08T09:00:00.000Z",
-          "endAt": "2026-04-08T12:00:00.000Z"
+          "startAt": "2026-04-08T08:00:00.000Z",
+          "endAt": "2026-04-08T11:00:00.000Z"
         }
       ]
     },
     {
-      "bookingId": "BKG-1775610625919-222",
-      "orderId": "ORD-1775610625919",
+      "bookingId": "BKG-1775612870106-587",
+      "orderId": "ORD-1775612870101",
       "customer": {
         "name": "jb,jnlk",
         "email": "tranbao180305@gmail.com",
@@ -245,15 +210,15 @@
       },
       "paymentMethod": "cash",
       "paymentStatus": "success",
-      "status": "confirmed",
+      "status": "cancelled",
       "totalAmount": 350000,
-      "createdAt": "2026-04-08T01:10:25.919Z",
-      "updatedAt": "2026-04-08T01:10:25.919Z",
+      "createdAt": "2026-04-08T01:47:50.101Z",
+      "updatedAt": "2026-04-08T01:57:26.356Z",
       "items": [
         {
-          "lineId": "ORD-1775610625919-1",
-          "roomId": 5,
-          "roomName": "Si02 + có bồn tắm+có máy chiếu+ có ban công",
+          "lineId": "ORD-1775612870101-1",
+          "roomId": 6,
+          "roomName": "Si03 + NVS riêng+có máy chiếu+ có cửa sổ",
           "quantity": 1,
           "unitPrice": 350000,
           "amount": 350000,
@@ -264,8 +229,8 @@
           "bookingDate": "2026-04-08",
           "checkInDate": null,
           "checkOutDate": null,
-          "startAt": "2026-04-08T09:00:00.000Z",
-          "endAt": "2026-04-08T12:00:00.000Z"
+          "startAt": "2026-04-08T08:00:00.000Z",
+          "endAt": "2026-04-08T11:00:00.000Z"
         }
       ]
     }
