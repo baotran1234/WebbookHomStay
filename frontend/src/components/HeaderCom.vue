@@ -7,6 +7,7 @@
         <nav class="main-nav">
           <router-link to="/">Trang chủ</router-link>
           <router-link to="/products">Khám Phá Homestay</router-link>
+          <router-link v-if="auth.isLoggedIn && !auth.isAdmin" to="/booked-rooms">Phòng đã đặt</router-link>
           <router-link v-if="auth.isAdmin" to="/admin">Trang quản lý</router-link>
         </nav>
 
@@ -30,7 +31,7 @@
               <circle cx="9" cy="19" r="1.5" fill="currentColor" />
               <circle cx="17" cy="19" r="1.5" fill="currentColor" />
             </svg>
-            <span class="cart-label">Phòng đã đặt</span>
+            <span class="cart-label">Phòng đã chọn </span>
             <span class="cart-quantity">{{ cartStore.totalQuantity }}</span>
           </button>
         </div>
@@ -126,6 +127,8 @@ const onAuthSuccess = (payload) => {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .user-wrap {
@@ -146,6 +149,11 @@ const onAuthSuccess = (payload) => {
   border-radius: 999px;
   padding: 7px 12px;
   cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.login-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .cart-button {
@@ -158,6 +166,11 @@ const onAuthSuccess = (payload) => {
   border-radius: 999px;
   padding: 7px 12px;
   cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.cart-button:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .cart-icon {
@@ -189,7 +202,9 @@ const onAuthSuccess = (payload) => {
   .main-nav {
     order: 3;
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 12px 18px;
   }
 
   .right-tools {

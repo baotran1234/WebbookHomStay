@@ -140,6 +140,7 @@
               <tr>
                 <th>Mã đơn</th>
                 <th>Khách</th>
+                <th>Khung giờ</th>
                 <th>Từ giờ</th>
                 <th>Đến giờ</th>
                 <th>Trạng thái</th>
@@ -150,6 +151,7 @@
               <tr v-for="schedule in room.schedules" :key="`${schedule.bookingId}-${schedule.startAt}`">
                 <td>{{ schedule.orderId }}</td>
                 <td>{{ schedule.customerName || 'Khách lẻ' }}</td>
+                <td>{{ formatSlotRange(schedule.startAt, schedule.endAt) }}</td>
                 <td>{{ formatDate(schedule.startAt) }}</td>
                 <td>{{ formatDate(schedule.endAt) }}</td>
                 <td>{{ toBookingStatusLabel(schedule.status) }} / {{ toPaymentStatusLabel(schedule.paymentStatus) }}</td>
@@ -194,10 +196,9 @@
               <td>
                 <select :value="booking.status" @change="onStatusChange(booking.bookingId, $event)">
                   <option value="pending_payment">Chờ thanh toán</option>
-                  <option value="confirmed">Đã xác nhận</option>
+                  <option value="pending_confirmation">Chờ admin xác nhận</option>
                   <option value="checked_in">Đã nhận phòng</option>
                   <option value="checked_out">Đã trả phòng</option>
-                  <option value="completed">Hoàn tất</option>
                   <option value="cancelled">Đã hủy</option>
                 </select>
               </td>
@@ -315,6 +316,15 @@ const formatDate = (value) => {
   return date.toLocaleString('vi-VN')
 }
 
+const formatSlotRange = (startAt, endAt) => {
+  const start = new Date(startAt)
+  const end = new Date(endAt)
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 'Không có'
+  const startText = start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+  const endText = end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+  return `${startText} - ${endText}`
+}
+
 const toPaymentStatusLabel = (status) => {
   const map = {
     pending: 'Chờ thanh toán',
@@ -328,6 +338,7 @@ const toPaymentStatusLabel = (status) => {
 const toBookingStatusLabel = (status) => {
   const map = {
     pending_payment: 'Chờ thanh toán',
+    pending_confirmation: 'Chờ admin xác nhận',
     confirmed: 'Đã xác nhận',
     checked_in: 'Đã nhận phòng',
     checked_out: 'Đã trả phòng',

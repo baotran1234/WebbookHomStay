@@ -6,6 +6,7 @@ import HoaDonComponent from "@/components/HoaDonComponent.vue";
 import PaymentPage from "@/components/PaymentPage.vue";
 import PaymentSuccess from "@/components/PaymentSuccess.vue";
 import AdminDashboard from "@/components/AdminDashboard.vue";
+import BookedRooms from "@/components/BookedRooms.vue";
 
 const routes = [
     {
@@ -44,6 +45,11 @@ const routes = [
         path: "/payment-success",
         name: "PaymentSuccess",
         component: PaymentSuccess,
+    },
+    {
+        path: "/booked-rooms",
+        name: "BookedRooms",
+        component: BookedRooms,
     },
     {
         path: "/admin",

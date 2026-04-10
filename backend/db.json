@@ -282,7 +282,7 @@
     },
     {
       "id": 3,
-      "tentopping": "Quá đêm (09h hôm sau)",
+      "tentopping": "Quá đêm (22h - 9h hôm sau)",
       "price": 495000
     },
     {
@@ -292,7 +292,7 @@
     },
     {
       "id": 5,
-      "tentopping": "2ND từ (15h - 13h hôm sau)",
+      "tentopping": "2ND từ (8h - 16h hôm sau)",
       "price": 820000
     },
     {

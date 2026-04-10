@@ -3,20 +3,20 @@
     <div class="footer-inner">
       <div>
         <h4>NestStay Homestay</h4>
-        <p>Dia chi: 123 Le Loi, Da Nang</p>
-        <p>Hotline: 0912 345 678</p>
+        <p>Địa chỉ: 123 Lê Lợi, Đà Nẵng</p>
+        <p>Hotline: 0933 390 617</p>
       </div>
 
       <div>
-        <h4>Lien he</h4>
+        <h4>Liên Hệ</h4>
         <p>Email: support@neststay.vn</p>
-        <p>Thoi gian ho tro: 08:00 - 22:00</p>
+        <p>Thời Gian Hỗ Trợ: 24/24</p>
       </div>
 
       <div>
-        <h4>Chinh sach</h4>
-        <p>Chinh sach dat phong</p>
-        <p>Hoan huy va doi lich</p>
+        <h4>Chính Sách</h4>
+        <p>Chính sách đặt phòng</p>
+        <p>Hoàn hủy và đổi lịch</p>
       </div>
     </div>
     <p class="copyright">© 2026 NestStay. All rights reserved.</p>

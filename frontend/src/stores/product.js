@@ -8,6 +8,7 @@ export const useProductStore = defineStore("product", {
         productid:null,
         sizes:[],
         toppings:[],
+        utilities: [],
         categories: [],
         error: null
     }),
@@ -69,6 +70,15 @@ export const useProductStore = defineStore("product", {
                 console.error("Lỗi khi lấy dữ liệu  mức thờ gian:", this.error);
             }
 
+        },
+        async fetchUtilities() {
+            try {
+                const response = await axios.get(`${APIURL}/utilities`);
+                this.utilities = response.data;
+            } catch (error) {
+                this.error = "Lỗi khi lấy dữ liệu tiện ích";
+                console.error("Lỗi khi lấy dữ liệu tiện ích:", this.error);
+            }
         }
     }
     

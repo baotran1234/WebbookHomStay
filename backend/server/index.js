@@ -25,6 +25,8 @@ const DEFAULT_BANK_INFO = {
 }
 
 const INTENT_EXPIRE_MINUTES = Number(process.env.PAYMENT_EXPIRE_MINUTES || 15)
+const BOOKING_CANCEL_WINDOW_MINUTES = 120
+let bookingStoreMutationQueue = Promise.resolve()
 
 app.use(cors())
 app.use(express.json())
@@ -174,7 +176,7 @@ function computePaymentStatus(payment) {
   return PAYMENT_STATUS.PENDING
 }
 
-function updatePaymentFromTransaction(input, options = {}) {
+async function updatePaymentFromTransaction(input, options = {}) {
   const orderId = normalizeString(input.orderId || input.transferContent)
   if (!orderId) return { error: 'orderId is required' }
 
@@ -209,7 +211,7 @@ function updatePaymentFromTransaction(input, options = {}) {
   }
 
   savePayment(updated)
-  syncBookingPaymentStatus(updated.orderId, updated.status)
+  await syncBookingPaymentStatus(updated.orderId, updated.status)
   return { payment: updated }
 }
 
@@ -257,6 +259,12 @@ function readBookingStore() {
 
 function writeBookingStore(store) {
   fs.writeFileSync(BOOKING_STORE_PATH, JSON.stringify(store, null, 2), 'utf8')
+}
+
+function queueBookingStoreMutation(task) {
+  const run = bookingStoreMutationQueue.then(() => task())
+  bookingStoreMutationQueue = run.catch(() => {})
+  return run
 }
 
 function toDayIso(date) {
@@ -344,6 +352,26 @@ function isBookingBlockingSlot(booking) {
   return !isBookingReleased(booking)
 }
 
+function isRevenueRecognizedBooking(booking) {
+  const status = String(booking?.status || '').toLowerCase()
+  const paymentStatus = String(booking?.paymentStatus || '').toLowerCase()
+  return paymentStatus === 'success' && ['confirmed', 'checked_in', 'checked_out', 'completed'].includes(status)
+}
+
+function getBookingCancelDeadline(booking) {
+  const createdAt = new Date(booking?.createdAt || nowIso())
+  return new Date(createdAt.getTime() + BOOKING_CANCEL_WINDOW_MINUTES * 60 * 1000)
+}
+
+function canBookingBeCancelled(booking) {
+  const status = String(booking?.status || '').toLowerCase()
+  if (!['pending_payment', 'pending_confirmation', 'confirmed'].includes(status)) {
+    return false
+  }
+
+  return Date.now() <= getBookingCancelDeadline(booking).getTime()
+}
+
 function buildBookingRecord(payload) {
   const orderId = normalizeString(payload.orderId) || buildOrderId()
   const customer = payload.customer && typeof payload.customer === 'object' ? payload.customer : {}
@@ -385,7 +413,7 @@ function buildBookingRecord(payload) {
     },
     paymentMethod,
     paymentStatus,
-    status: paymentStatus === 'success' ? 'confirmed' : 'pending_payment',
+    status: paymentStatus === 'success' ? 'pending_confirmation' : 'pending_payment',
     totalAmount,
     createdAt,
     updatedAt: nowIso(),
@@ -416,6 +444,33 @@ function findBookingConflicts(nextBooking, allBookings) {
       })
     })
   })
+
+  return conflicts
+}
+
+function findSelfBookingConflicts(booking) {
+  const lines = Array.isArray(booking?.items) ? booking.items : []
+  const conflicts = []
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const current = lines[index]
+    for (let nextIndex = index + 1; nextIndex < lines.length; nextIndex += 1) {
+      const next = lines[nextIndex]
+      if (Number(current?.roomId) !== Number(next?.roomId)) continue
+      if (!isOverlap(current?.startAt, current?.endAt, next?.startAt, next?.endAt)) continue
+
+      conflicts.push({
+        roomId: current.roomId,
+        roomName: current.roomName || next.roomName,
+        firstLineId: current.lineId,
+        firstStartAt: current.startAt,
+        firstEndAt: current.endAt,
+        secondLineId: next.lineId,
+        secondStartAt: next.startAt,
+        secondEndAt: next.endAt,
+      })
+    }
+  }
 
   return conflicts
 }
@@ -501,7 +556,7 @@ function collectRevenueStats(bookings) {
   weekStart.setHours(0, 0, 0, 0)
 
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const paidBookings = bookings.filter((booking) => String(booking.paymentStatus || '').toLowerCase() === 'success')
+  const paidBookings = bookings.filter((booking) => isRevenueRecognizedBooking(booking))
 
   const revenueWeek = paidBookings
     .filter((booking) => new Date(booking.updatedAt || booking.createdAt) >= weekStart)
@@ -652,21 +707,24 @@ function ensureDefaultAdmin() {
 
 function syncBookingPaymentStatus(orderId, paymentStatus) {
   const normalizedOrderId = normalizeString(orderId)
-  if (!normalizedOrderId) return
+  if (!normalizedOrderId) return Promise.resolve()
 
-  const store = readBookingStore()
-  const index = store.bookings.findIndex((item) => item.orderId === normalizedOrderId)
-  if (index < 0) return
+  return queueBookingStoreMutation(() => {
+    const store = readBookingStore()
+    const index = store.bookings.findIndex((item) => item.orderId === normalizedOrderId)
+    if (index < 0) return null
 
-  const nextStatus = normalizeStatus(paymentStatus)
-  const current = store.bookings[index]
-  store.bookings[index] = {
-    ...current,
-    paymentStatus: nextStatus,
-    status: nextStatus === 'success' ? 'confirmed' : current.status,
-    updatedAt: nowIso(),
-  }
-  writeBookingStore(store)
+    const nextStatus = normalizeStatus(paymentStatus)
+    const current = store.bookings[index]
+    store.bookings[index] = {
+      ...current,
+      paymentStatus: nextStatus,
+      status: nextStatus === 'success' ? 'pending_confirmation' : current.status,
+      updatedAt: nowIso(),
+    }
+    writeBookingStore(store)
+    return store.bookings[index]
+  })
 }
 
 app.get('/api/health', (_req, res) => {
@@ -846,14 +904,14 @@ app.get('/api/rooms/:roomId/availability', (req, res) => {
   })
 })
 
-app.post('/api/payments/:orderId/confirm-manual', (req, res) => {
+app.post('/api/payments/:orderId/confirm-manual', async (req, res) => {
   const payload = {
     ...(req.body || {}),
     orderId: normalizeString(req.params.orderId),
     status: 'success',
   }
 
-  const result = updatePaymentFromTransaction(payload, { source: 'manual_confirm' })
+  const result = await updatePaymentFromTransaction(payload, { source: 'manual_confirm' })
   if (result.error) {
     res.status(400).json({ ok: false, message: result.error })
     return
@@ -862,8 +920,8 @@ app.post('/api/payments/:orderId/confirm-manual', (req, res) => {
   res.json({ ok: true, payment: toClientPaymentResponse(result.payment) })
 })
 
-app.post('/api/webhooks/payment', (req, res) => {
-  const result = updatePaymentFromTransaction(req.body || {}, { source: 'generic_webhook' })
+app.post('/api/webhooks/payment', async (req, res) => {
+  const result = await updatePaymentFromTransaction(req.body || {}, { source: 'generic_webhook' })
   if (result.error) {
     res.status(400).json({ ok: false, message: result.error })
     return
@@ -872,7 +930,7 @@ app.post('/api/webhooks/payment', (req, res) => {
   res.json({ ok: true, payment: toClientPaymentResponse(result.payment) })
 })
 
-app.post('/api/webhooks/momo', (req, res) => {
+app.post('/api/webhooks/momo', async (req, res) => {
   const payload = req.body || {}
   const normalized = {
     orderId: payload.orderId,
@@ -883,7 +941,7 @@ app.post('/api/webhooks/momo', (req, res) => {
     status: Number(payload.resultCode) === 0 ? 'success' : 'invalid',
   }
 
-  const result = updatePaymentFromTransaction(normalized, { source: 'momo_webhook' })
+  const result = await updatePaymentFromTransaction(normalized, { source: 'momo_webhook' })
   if (result.error) {
     res.status(400).json({ resultCode: 1, message: result.error })
     return
@@ -896,126 +954,189 @@ app.post('/api/webhooks/momo', (req, res) => {
   })
 })
 
-app.post('/api/admin/bookings', (req, res) => {
+app.post('/api/admin/bookings', async (req, res) => {
   const payload = req.body || {}
   const booking = buildBookingRecord(payload)
-  const store = readBookingStore()
-
-  const existingIndex = store.bookings.findIndex((item) => item.orderId === booking.orderId)
-  if (existingIndex >= 0) {
-    const updated = {
-      ...store.bookings[existingIndex],
-      ...booking,
-      bookingId: store.bookings[existingIndex].bookingId,
-      updatedAt: nowIso(),
-    }
-    const tempBookings = [...store.bookings]
-    tempBookings[existingIndex] = updated
-    const conflicts = findBookingConflicts(updated, tempBookings)
-
-    if (conflicts.length > 0) {
-      res.status(409).json({
-        ok: false,
-        message: 'Booking schedule conflicts with existing reservations',
-        conflicts,
-        suggestions: findSuggestedRooms(updated, tempBookings),
-      })
-      return
-    }
-
-    store.bookings[existingIndex] = updated
-    writeBookingStore(store)
-    res.json({ ok: true, booking: updated, conflicts: [] })
-    return
-  }
-
-  const conflicts = findBookingConflicts(booking, store.bookings)
-  if (conflicts.length > 0) {
+  const selfConflicts = findSelfBookingConflicts(booking)
+  if (selfConflicts.length > 0) {
     res.status(409).json({
       ok: false,
-      message: 'Booking schedule conflicts with existing reservations',
-      conflicts,
-      suggestions: findSuggestedRooms(booking, store.bookings),
+      message: 'Booking contains overlapping time ranges for the same room',
+      conflicts: selfConflicts,
     })
     return
   }
 
-  store.bookings.push(booking)
-  writeBookingStore(store)
-  res.json({ ok: true, booking, conflicts: [] })
+  const result = await queueBookingStoreMutation(() => {
+    const store = readBookingStore()
+    const existingIndex = store.bookings.findIndex((item) => item.orderId === booking.orderId)
+
+    if (existingIndex >= 0) {
+      const updated = {
+        ...store.bookings[existingIndex],
+        ...booking,
+        bookingId: store.bookings[existingIndex].bookingId,
+        updatedAt: nowIso(),
+      }
+      const tempBookings = [...store.bookings]
+      tempBookings[existingIndex] = updated
+      const conflicts = findBookingConflicts(updated, tempBookings)
+
+      if (conflicts.length > 0) {
+        return {
+          statusCode: 409,
+          body: {
+            ok: false,
+            message: 'Booking schedule conflicts with existing reservations',
+            conflicts,
+            suggestions: findSuggestedRooms(updated, tempBookings),
+          },
+        }
+      }
+
+      store.bookings[existingIndex] = updated
+      writeBookingStore(store)
+      return {
+        statusCode: 200,
+        body: { ok: true, booking: updated, conflicts: [] },
+      }
+    }
+
+    const conflicts = findBookingConflicts(booking, store.bookings)
+    if (conflicts.length > 0) {
+      return {
+        statusCode: 409,
+        body: {
+          ok: false,
+          message: 'Booking schedule conflicts with existing reservations',
+          conflicts,
+          suggestions: findSuggestedRooms(booking, store.bookings),
+        },
+      }
+    }
+
+    store.bookings.push(booking)
+    writeBookingStore(store)
+    return {
+      statusCode: 200,
+      body: { ok: true, booking, conflicts: [] },
+    }
+  })
+
+  res.status(result.statusCode).json(result.body)
 })
 
-app.patch('/api/admin/bookings/:orderId/payment', (req, res) => {
+app.patch('/api/admin/bookings/:orderId/payment', async (req, res) => {
   const orderId = normalizeString(req.params.orderId)
   const nextPaymentStatus = normalizeStatus(req.body?.paymentStatus || 'success')
-  const store = readBookingStore()
-  const index = store.bookings.findIndex((item) => item.orderId === orderId)
+  const result = await queueBookingStoreMutation(() => {
+    const store = readBookingStore()
+    const index = store.bookings.findIndex((item) => item.orderId === orderId)
 
-  if (index < 0) {
-    res.status(404).json({ ok: false, message: 'booking not found' })
-    return
-  }
+    if (index < 0) {
+      return {
+        statusCode: 404,
+        body: { ok: false, message: 'booking not found' },
+      }
+    }
 
-  const current = store.bookings[index]
-  const updated = {
-    ...current,
-    paymentStatus: nextPaymentStatus,
-    status: nextPaymentStatus === 'success' ? 'confirmed' : current.status,
-    updatedAt: nowIso(),
-  }
-  store.bookings[index] = updated
-  writeBookingStore(store)
-  res.json({ ok: true, booking: updated })
+    const current = store.bookings[index]
+    const updated = {
+      ...current,
+      paymentStatus: nextPaymentStatus,
+      status: nextPaymentStatus === 'success' ? 'pending_confirmation' : current.status,
+      updatedAt: nowIso(),
+    }
+    store.bookings[index] = updated
+    writeBookingStore(store)
+    return {
+      statusCode: 200,
+      body: { ok: true, booking: updated },
+    }
+  })
+
+  res.status(result.statusCode).json(result.body)
 })
 
-app.patch('/api/admin/bookings/:bookingId/status', (req, res) => {
+app.patch('/api/admin/bookings/:bookingId/status', async (req, res) => {
   const bookingId = normalizeString(req.params.bookingId)
   const nextStatus = normalizeStatus(req.body?.status || '')
-  const validStatuses = new Set(['pending_payment', 'confirmed', 'checked_in', 'checked_out', 'cancelled', 'completed'])
+  const validStatuses = new Set(['pending_payment', 'pending_confirmation', 'confirmed', 'checked_in', 'checked_out', 'cancelled', 'completed'])
   if (!validStatuses.has(nextStatus)) {
     res.status(400).json({ ok: false, message: 'invalid status' })
     return
   }
 
-  const store = readBookingStore()
-  const index = store.bookings.findIndex((item) => item.bookingId === bookingId)
-  if (index < 0) {
-    res.status(404).json({ ok: false, message: 'booking not found' })
-    return
-  }
+  const result = await queueBookingStoreMutation(() => {
+    const store = readBookingStore()
+    const index = store.bookings.findIndex((item) => item.bookingId === bookingId)
+    if (index < 0) {
+      return {
+        statusCode: 404,
+        body: { ok: false, message: 'booking not found' },
+      }
+    }
 
-  const updated = {
-    ...store.bookings[index],
-    status: nextStatus,
-    updatedAt: nowIso(),
-  }
-  store.bookings[index] = updated
-  writeBookingStore(store)
-  res.json({ ok: true, booking: updated })
+    const current = store.bookings[index]
+    if (nextStatus === 'cancelled' && !canBookingBeCancelled(current)) {
+      return {
+        statusCode: 400,
+        body: {
+          ok: false,
+          message: 'Chi duoc huy booking trong 2 gio sau khi dat.',
+        },
+      }
+    }
+
+    const updated = {
+      ...current,
+      status: nextStatus,
+      updatedAt: nowIso(),
+    }
+    store.bookings[index] = updated
+    writeBookingStore(store)
+    return {
+      statusCode: 200,
+      body: { ok: true, booking: updated },
+    }
+  })
+
+  res.status(result.statusCode).json(result.body)
 })
 
-app.delete('/api/admin/bookings/:bookingId', (req, res) => {
+app.delete('/api/admin/bookings/:bookingId', async (req, res) => {
   const bookingId = normalizeString(req.params.bookingId)
-  const store = readBookingStore()
-  const index = store.bookings.findIndex((item) => item.bookingId === bookingId)
+  const result = await queueBookingStoreMutation(() => {
+    const store = readBookingStore()
+    const index = store.bookings.findIndex((item) => item.bookingId === bookingId)
 
-  if (index < 0) {
-    res.status(404).json({ ok: false, message: 'booking not found' })
-    return
-  }
+    if (index < 0) {
+      return {
+        statusCode: 404,
+        body: { ok: false, message: 'booking not found' },
+      }
+    }
 
-  const booking = store.bookings[index]
-  const canDelete = String(booking?.status || '').toLowerCase() === 'checked_out'
-    && String(booking?.paymentStatus || '').toLowerCase() === 'success'
+    const booking = store.bookings[index]
+    const canDelete = String(booking?.status || '').toLowerCase() === 'checked_out'
+      && String(booking?.paymentStatus || '').toLowerCase() === 'success'
 
-  if (!canDelete) {
-    res.status(400).json({ ok: false, message: 'booking is not eligible for deletion' })
-    return
-  }
+    if (!canDelete) {
+      return {
+        statusCode: 400,
+        body: { ok: false, message: 'booking is not eligible for deletion' },
+      }
+    }
 
-  store.bookings.splice(index, 1)
-  writeBookingStore(store)
-  res.json({ ok: true, bookingId })
+    store.bookings.splice(index, 1)
+    writeBookingStore(store)
+    return {
+      statusCode: 200,
+      body: { ok: true, bookingId },
+    }
+  })
+
+  res.status(result.statusCode).json(result.body)
 })
 
 app.get('/api/admin/bookings', (_req, res) => {

@@ -18,9 +18,16 @@
       <div class="info-box">
         <h1>{{ store.productid.tensp }}</h1>
         <p class="price">{{ formatPrice(store.productid.gia) }} / dem</p>
-        <p class="desc">
-          Khong gian phong thoang mat, day du tien nghi co ban. 
-        </p>
+        <p class="desc">{{ store.productid.mota }}</p>
+        <div class="selection" v-if="utilityList.length">
+          <label>Tien ich:</label>
+          <div class="utility-grid">
+            <div v-for="utility in utilityList" :key="utility.id" class="utility-item">
+              <span class="utility-dot"></span>
+              <span>{{ utility.tenutility }}</span>
+            </div>
+          </div>
+        </div>
 
         <div class="selection">
           <label>Loai phong:</label>
@@ -48,20 +55,28 @@
         </div>
 
         <div class="selection">
-          <div class="slot-head">
+          <!-- <div class="slot-head">
             <label>Ngay vao:</label>
             <span class="slot-legend">Trạng thái: trắng là còn trống, đỏ là đã được giữ cho đến khi admin xác nhận đã trả phòng</span>
-          </div>
-          <div class="options-row">
-            <input class="date-input" type="date" v-model="selectedDate" @change="refreshAvailability" />
+          </div> -->
+          <div class="date-row">
+            <label class="date-field">
+              <span>Ngay vao</span>
+              <input class="date-input" type="date" v-model="selectedDate" @change="refreshAvailability" />
+            </label>
+            <label v-if="checkoutDateLabel" class="date-field">
+              <span>Ngay ra</span>
+              <input class="date-input readonly" type="text" :value="checkoutDateLabel" readonly />
+            </label>
           </div>
         </div>
 
         <div class="selection">
           <div class="slot-head">
-            <label>Chon khung gio vao:</label>
+            <label>Chọn Khung Giờ Vào:</label>
             <span class="slot-legend">{{ selectedPackageLabel }}</span>
           </div>
+          <!-- <p class="slot-note helper">Khung gio duoc chia thanh block co dinh, khong chong nhau de ban de chon va admin de theo doi.</p> -->
           <p v-if="availabilityLoading" class="slot-note">Dang tai khung gio...</p>
           <p v-else-if="availabilityError" class="slot-note error">{{ availabilityError }}</p>
           <div class="slot-grid">
@@ -204,6 +219,7 @@ const isSurchargeOption = (name = '') => {
 const timePriceOptions = computed(() => store.toppings.filter((t) => !isSurchargeOption(t.tentopping)))
 
 const surchargeOptions = computed(() => store.toppings.filter((t) => isSurchargeOption(t.tentopping)))
+const utilityList = computed(() => Array.isArray(store.utilities) ? store.utilities : [])
 
 const alternativeRooms = computed(() => {
   const currentId = String(store.productid?.id || '')
@@ -222,6 +238,7 @@ const selectedTimePrice = computed(() => {
 })
 
 const selectedPackageLabel = computed(() => selectedTimePrice.value?.tentopping || '3 tiếng')
+const selectedPackageId = computed(() => Number(selectedTimePrice.value?.id || 0))
 
 const selectedSlotStartAt = computed(() => selectedSlot.value?.startAt || '')
 const selectedSlotLabel = computed(() => selectedSlot.value?.label || '')
@@ -232,19 +249,19 @@ const selectedPackageName = computed(() => normalizePackageName(selectedTimePric
 
 const slotPlan = computed(() => {
   const name = selectedPackageName.value
-  if (name.includes('qua dem')) {
+  if (selectedPackageId.value === 3 || name.includes('qua dem') || name.includes('09h hom sau')) {
     return { durationMinutes: 13 * 60, startHours: [20] }
   }
-  if (name.includes('ban ngay')) {
+  if (selectedPackageId.value === 4 || name.includes('ban ngay') || name.includes('10h - 18h')) {
     return { durationMinutes: 8 * 60, startHours: [10] }
   }
-  if (name.includes('2nd')) {
+  if (selectedPackageId.value === 5 || name.includes('2nd') || name.includes('13h hom sau')) {
     return { durationMinutes: 22 * 60, startHours: [15] }
   }
-  if (name.includes('4 tieng')) {
-    return { durationMinutes: 4 * 60, startHours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] }
+  if (selectedPackageId.value === 2 || name.includes('4 tieng')) {
+    return { durationMinutes: 4 * 60, startHours: [8, 12, 16, 20] }
   }
-  return { durationMinutes: 3 * 60, startHours: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21] }
+  return { durationMinutes: 3 * 60, startHours: [8, 11, 14, 17, 20] }
 })
 
 const buildIsoAtTime = (dateKey, hour, minute = 0) => {
@@ -254,6 +271,23 @@ const buildIsoAtTime = (dateKey, hour, minute = 0) => {
 }
 
 const formatClock = (isoString) => String(isoString || '').slice(11, 16)
+const formatDateDisplay = (dateKey) => {
+  if (!dateKey) return ''
+  const date = new Date(`${dateKey}T00:00:00.000Z`)
+  if (Number.isNaN(date.getTime())) return ''
+  return `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()}`
+}
+const addDaysToDateKey = (dateKey, days) => {
+  const date = new Date(`${dateKey}T00:00:00.000Z`)
+  date.setUTCDate(date.getUTCDate() + days)
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`
+}
+const checkoutDateLabel = computed(() => {
+  if (selectedPackageId.value === 3 || selectedPackageId.value === 5) {
+    return formatDateDisplay(addDaysToDateKey(selectedDate.value, 1))
+  }
+  return ''
+})
 
 const addMinutesToIso = (isoString, minutes) => new Date(new Date(isoString).getTime() + minutes * 60000).toISOString()
 
@@ -404,7 +438,7 @@ const resetSelections = () => {
 }
 
 const loadProductDetail = async (id) => {
-  await Promise.all([store.fetchProductById(id), store.fetchSizes(), store.fetchToppings(), store.fetchProducts()])
+  await Promise.all([store.fetchProductById(id), store.fetchSizes(), store.fetchToppings(), store.fetchUtilities(), store.fetchProducts()])
   resetSelections()
   selectedTopping.value = timePriceOptions.value[0]?.id || null
   await refreshAvailability()
@@ -539,6 +573,26 @@ watch(selectedTopping, () => {
   gap: 8px;
 }
 
+.date-row {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
+  gap: 10px;
+}
+
+.date-field {
+  display: grid;
+  gap: 6px;
+}
+
+.date-field span {
+  color: #b9c8e3;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .chip {
   border: 1px solid #2d384b;
   border-radius: 999px;
@@ -558,6 +612,29 @@ watch(selectedTopping, () => {
   margin-top: 8px;
   display: grid;
   gap: 8px;
+}
+
+.utility-grid {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.utility-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #dce7fb;
+  padding: 0;
+}
+
+.utility-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #7bc6ff;
+  margin-top: 6px;
+  flex: 0 0 auto;
 }
 
 .addon-item {
@@ -581,6 +658,10 @@ watch(selectedTopping, () => {
 
 .slot-note.error {
   color: #ff9d8d;
+}
+
+.slot-note.helper {
+  color: #8eb8f0;
 }
 
 .slot-grid {
@@ -724,11 +805,30 @@ watch(selectedTopping, () => {
 
 .date-input {
   min-height: 38px;
-  border: 1px solid #2d384b;
-  border-radius: 8px;
-  padding: 8px 10px;
-  color: #e8efff;
-  background: #121722;
+  border: 1px solid #3b4f6d;
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #f4f8ff;
+  background: linear-gradient(180deg, #162131 0%, #111927 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: #6fb6ff;
+  box-shadow: 0 0 0 3px rgba(111, 182, 255, 0.18);
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(88%) sepia(14%) saturate(503%) hue-rotate(180deg) brightness(103%) contrast(101%);
+}
+
+.date-input.readonly {
+  border-color: #31445f;
+  background: linear-gradient(180deg, #101826 0%, #0c1320 100%);
+  color: #d6e3f7;
+  cursor: default;
 }
 
 .qty-control {

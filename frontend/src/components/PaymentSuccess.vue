@@ -15,6 +15,7 @@
 
       <div class="actions">
         <button type="button" class="secondary" @click="goHome">Ve trang chu</button>
+        <button type="button" class="secondary ghost" @click="goBookedRooms">Phong da dat</button>
         <button type="button" class="primary" @click="goProducts">Tiep tuc dat phong</button>
       </div>
     </div>
@@ -63,6 +64,10 @@ const goHome = () => {
 
 const goProducts = () => {
   router.push('/products')
+}
+
+const goBookedRooms = () => {
+  router.push('/booked-rooms')
 }
 
 onMounted(() => {
@@ -140,6 +145,11 @@ h1 {
   background: #151b27;
   color: #f2b8de;
   border: 1px solid #990066;
+}
+
+.actions .secondary.ghost {
+  color: #cce1ff;
+  border-color: #305f99;
 }
 
 .actions .primary {
