@@ -30,21 +30,6 @@
         </div>
 
         <div class="selection">
-          <label>Loai phong:</label>
-          <div class="options-row">
-            <button
-              v-for="s in store.sizes"
-              :key="s.id"
-              type="button"
-              :class="['chip', { active: String(selectedSize) === String(s.id) }]"
-              @click="selectedSize = s.id"
-            >
-              {{ s.tensize }} (+{{ formatPrice(s.price) }})
-            </button>
-          </div>
-        </div>
-
-        <div class="selection">
           <label>Mức giá cho 2 người vào các khung giờ:</label>
           <div class="addon-grid">
             <label v-for="t in timePriceOptions" :key="t.id" class="addon-item">
@@ -169,7 +154,6 @@ const availability = ref({ occupiedRanges: [] })
 const availabilityLoading = ref(false)
 const availabilityError = ref('')
 
-const selectedSize = ref(null)
 const selectedTopping = ref(null)
 const selectedSurcharges = ref([])
 const quantity = ref(1)
@@ -206,9 +190,7 @@ const setActiveImage = (image) => {
 }
 
 const currentSize = computed(() => {
-  const firstSize = store.sizes[0]
-  const sizeId = selectedSize.value || firstSize?.id
-  return store.sizes.find((s) => String(s.id) === String(sizeId)) || firstSize
+  return store.sizes[0] || null
 })
 
 const isSurchargeOption = (name = '') => {
@@ -429,7 +411,6 @@ const buyNow = async () => {
 }
 
 const resetSelections = () => {
-  selectedSize.value = null
   selectedSurcharges.value = []
   selectedDate.value = todayKey()
   selectedSlot.value = null

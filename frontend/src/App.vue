@@ -58,5 +58,12 @@ body {
 
 .main-content {
   flex: 1;
+  padding-top: 72px;
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    padding-top: 96px;
+  }
 }
 </style>

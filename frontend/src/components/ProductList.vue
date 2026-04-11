@@ -153,6 +153,19 @@ h1 {
   border: 1px solid #242c3c;
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.42);
   cursor: pointer;
+  transform: translateY(0);
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+}
+
+.room-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow:
+    0 22px 42px rgba(0, 0, 0, 0.58),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  border-color: #4a5775;
 }
 
 .room-card img {
@@ -196,6 +209,16 @@ h1 {
 .card-actions button {
   background: #990066;
   color: #ffe8f6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-card {
+    transition: none;
+  }
+
+  .room-card:hover {
+    transform: none;
+  }
 }
 
 .empty-note {

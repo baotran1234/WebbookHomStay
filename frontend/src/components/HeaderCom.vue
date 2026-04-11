@@ -81,10 +81,13 @@ const onAuthSuccess = (payload) => {
 
 <style scoped>
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 20;
-  background: #10263b;
+  background: rgba(16, 38, 59, 0.96);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
