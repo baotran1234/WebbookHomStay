@@ -1,29 +1,29 @@
 <template>
   <section class="list-page">
     <div class="list-inner">
-      <h1>Danh sach phong homestay</h1>
+      <h1>Danh sách phòng homestay</h1>
 
       <div class="toolbar">
-        <input v-model.trim="keyword" type="text" placeholder="Tim theo ten phong..." />
+        <input v-model.trim="keyword" type="text" placeholder="Tìm theo tên phòng..." />
 
         <select v-model="selectedCategory">
-          <option value="all">Tat ca danh muc</option>
+          <option value="all">Tất cả danh mục</option>
           <option v-for="cate in store.categories" :key="cate.id" :value="String(cate.id)">
             {{ cate.tendm }}
           </option>
         </select>
 
         <select v-model="selectedPriceRange">
-          <option value="all">Tat ca muc gia</option>
-          <option value="0-400000">Duoi 400.000đ</option>
+          <option value="all">Tất cả mức giá</option>
+          <option value="0-400000">Dưới 400.000đ</option>
           <option value="400000-700000">400.000đ - 700.000đ</option>
-          <option value="700000-9999999">Tren 700.000đ</option>
+          <option value="700000-9999999">Trên 700.000đ</option>
         </select>
 
         <select v-model="sortBy">
-          <option value="newest">Moi nhat</option>
-          <option value="price-asc">Gia tang dan</option>
-          <option value="price-desc">Gia giam dan</option>
+          <option value="newest">Mới nhất</option>
+          <option value="price-asc">Giá tăng dần</option>
+          <option value="price-desc">Giá giảm dần</option>
         </select>
       </div>
 
@@ -34,14 +34,14 @@
             <h3>{{ room.tensp }}</h3>
             <p class="room-price">{{ formatPrice(room.gia) }} / đêm </p>
             <div class="card-actions">
-              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiet</button>
+              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiết</button>
             </div>
           </div>
         </article>
       </div>
 
       <p v-if="filteredRooms.length === 0" class="empty-note">
-        Khong tim thay phong phu hop voi bo loc hien tai.
+        Không tìm thấy phòng phù hợp với bộ lọc hiện tại.
       </p>
     </div>
   </section>

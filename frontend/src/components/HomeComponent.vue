@@ -26,8 +26,8 @@
 
     <div class="featured-wrap">
       <div class="section-head">
-        <h2>Phong sale</h2>
-        <router-link to="/products">Xem tat ca</router-link>
+        <h2>Phòng sale</h2>
+        <router-link to="/products">Xem tất cả</router-link>
       </div>
       <div class="featured-grid">
         <article class="room-card" v-for="room in saleRooms" :key="room.id" @click="goToDetail(room.id)">
@@ -43,7 +43,7 @@
               <span class="old-price">{{ formatPrice(room.gia) }}</span>
             </p>
             <div class="actions">
-              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiet</button>
+              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiết</button>
             </div>
           </div>
         </article>
@@ -52,8 +52,8 @@
 
     <div class="featured-wrap vip-wrap">
       <div class="section-head">
-        <h2>Phong VIP</h2>
-        <router-link to="/products">Xem tat ca</router-link>
+        <h2>Phòng VIP</h2>
+        <router-link to="/products">Xem tất cả</router-link>
       </div>
       <div class="featured-grid">
         <article class="room-card" v-for="room in vipRooms" :key="`vip-${room.id}`" @click="goToDetail(room.id)">
@@ -63,9 +63,9 @@
               <span class="room-tag vip">VIP</span>
             </div>
             <h3>{{ room.tensp }}</h3>
-            <p class="price">{{ formatPrice(room.gia) }} / dem</p>
+            <p class="price">{{ formatPrice(room.gia) }} / đêm</p>
             <div class="actions">
-              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiet</button>
+              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiết</button>
             </div>
           </div>
         </article>
@@ -74,8 +74,8 @@
 
     <div class="featured-wrap classic-wrap">
       <div class="section-head">
-        <h2>Phong Classic</h2>
-        <router-link to="/products">Xem tat ca</router-link>
+        <h2>Phòng Classic</h2>
+        <router-link to="/products">Xem tất cả</router-link>
       </div>
       <div class="featured-grid">
         <article class="room-card" v-for="room in classicRooms" :key="`classic-${room.id}`" @click="goToDetail(room.id)">
@@ -85,9 +85,9 @@
               <span class="room-tag classic">Classic</span>
             </div>
             <h3>{{ room.tensp }}</h3>
-            <p class="price">{{ formatPrice(room.gia) }} / dem</p>
+            <p class="price">{{ formatPrice(room.gia) }} / đêm</p>
             <div class="actions">
-              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiet</button>
+              <button type="button" @click.stop="goToDetail(room.id)">Xem chi tiết</button>
             </div>
           </div>
         </article>
@@ -108,18 +108,18 @@ let sliderTimer = null
 
 const slides = [
   {
-    title: 'Khong gian yen binh gan thien nhien',
-    subtitle: 'Dat phong nhanh, check-in linh hoat, uu dai cuoi tuan.',
+    title: 'Không gian yên bình gần thiên nhiên',
+    subtitle: 'Đặt phòng nhanh, check-in linh hoạt, ưu đãi cuối tuần.',
     image: require('@/assets/image/mauneww.jpg'),
   },
   {
-    title: 'Phong sang trong cho ky nghi tron ven',
-    subtitle: 'Lua chon da dang tu studio den family room.',
+    title: 'Phòng sang trọng cho kỳ nghỉ trọn vẹn',
+    subtitle: 'Lựa chọn đa dạng từ studio đến family room.',
     image: require('@/assets/image/mauneww2.jpg'),
   },
   {
-    title: 'Dat lich de dang, xac nhan ngay lap tuc',
-    subtitle: 'Toi uu tren mobile va desktop, quan ly dat phong tien loi.',
+    title: 'Đặt lịch dễ dàng, xác nhận ngay lập tức',
+    subtitle: 'Tối ưu trên mobile và desktop, quản lý đặt phòng tiện lợi.',
     image: require('@/assets/image/mauneww3.jpg'),
   },
 ]

@@ -1,12 +1,12 @@
 <template>
   <section class="cart-page">
     <div class="cart-inner">
-      <h1>Gio hang dat phong</h1>
+      <h1>Giỏ hàng đặt phòng</h1>
 
       <form class="customer-info">
         <label>
-          Ho ten khach hang
-          <input v-model="customer.name" type="text" placeholder="Nhap ho ten" />
+          Họ tên khách hàng
+          <input v-model="customer.name" type="text" placeholder="Nhập họ tên" />
         </label>
         <label>
           Email
@@ -23,7 +23,7 @@
           <small v-if="errors.email" class="field-error">{{ errors.email }}</small>
         </label>
         <label>
-          So dien thoai
+          Số điện thoại
           <div class="phone-row">
             <select v-model="customer.countryCode" class="country-code">
               <option v-for="code in countryCodes" :key="code" :value="code">{{ code }}</option>
@@ -32,7 +32,7 @@
               v-model="customer.phone"
               :class="{ invalid: errors.phone }"
               type="tel"
-              placeholder="Nhap so dien thoai"
+              placeholder="Nhập số điện thoại"
               inputmode="numeric"
               minlength="9"
               maxlength="11"
@@ -44,23 +44,23 @@
           <small v-if="errors.phone" class="field-error">{{ errors.phone }}</small>
         </label>
         <label>
-          Dia chi
-          <input v-model="customer.address" type="text" placeholder="Nhap dia chi" />
+          Địa chỉ
+          <input v-model="customer.address" type="text" placeholder="Nhập địa chỉ" />
         </label>
       </form>
 
-      <h2>Danh sach phong da chon</h2>
-      <p v-if="cartStore.cartItems.length === 0" class="empty-cart">Gio hang dang trong.</p>
+      <h2>Danh sách phòng đã chọn</h2>
+      <p v-if="cartStore.cartItems.length === 0" class="empty-cart">Giỏ hàng đang trống.</p>
 
       <table v-else class="cart-table">
         <thead>
           <tr>
-            <th>Hinh</th>
-            <th>Ten phong</th>
-            <th>Gia</th>
-            <th>So luong</th>
-            <th>Thanh tien</th>
-            <th>Xoa</th>
+            <th>Hình</th>
+            <th>Tên phòng</th>
+            <th>Giá</th>
+            <th>Số lượng</th>
+            <th>Thành tiền</th>
+            <th>Xóa</th>
           </tr>
         </thead>
         <tbody>
@@ -70,8 +70,8 @@
               <div class="room-name">{{ item.name }}</div>
               <small v-if="item.slotLabel">Khung giờ: {{ item.slotLabel }}</small>
               <small v-if="item.bookingDate">Ngày vào: {{ item.bookingDate }}</small>
-              <small v-if="item.size">Loai phong: {{ item.size }}</small>
-              <small v-if="item.toppings && item.toppings.length">Tien ich: {{ item.toppings.join(', ') }}</small>
+              <small v-if="item.size">Loại phòng: {{ item.size }}</small>
+              <small v-if="item.toppings && item.toppings.length">Tiện ích: {{ item.toppings.join(', ') }}</small>
             </td>
             <td>{{ formatPrice(item.price) }}</td>
             <td>
@@ -82,22 +82,22 @@
               </div>
             </td>
             <td>{{ formatPrice(item.price * item.quantity) }}</td>
-            <td><button type="button" class="remove-btn" @click="cartStore.removeItem(index)">Xoa</button></td>
+            <td><button type="button" class="remove-btn" @click="cartStore.removeItem(index)">Xóa</button></td>
           </tr>
         </tbody>
       </table>
 
       <div class="summary">
         <div class="payment-method">
-          <label><input v-model="paymentMethod" type="radio" value="cash" /> Thanh toan tien mat</label>
-          <label><input v-model="paymentMethod" type="radio" value="bank" /> Chuyen khoan ngan hang</label>
+          <label><input v-model="paymentMethod" type="radio" value="cash" /> Thanh toán tiền mặt</label>
+          <label><input v-model="paymentMethod" type="radio" value="bank" /> Chuyển khoản ngân hàng</label>
         </div>
-        <p>Tong tien: <strong>{{ formatPrice(cartStore.totalAmount) }}</strong></p>
+        <p>Tổng tiền: <strong>{{ formatPrice(cartStore.totalAmount) }}</strong></p>
       </div>
 
       <div class="actions">
-        <button type="button" class="secondary" @click="goHome">Tiep tuc xem phong</button>
-        <button type="button" class="primary" :disabled="cartStore.cartItems.length === 0" @click="confirmBooking">Xac nhan dat phong</button>
+        <button type="button" class="secondary" @click="goHome">Tiếp tục xem phòng</button>
+        <button type="button" class="primary" :disabled="cartStore.cartItems.length === 0" @click="confirmBooking">Xác nhận đặt phòng</button>
       </div>
     </div>
   </section>
@@ -161,12 +161,12 @@ const onQuantityInput = (index, event) => {
 const validateEmail = () => {
   const email = String(customer.email || '').trim().toLowerCase()
   if (!email) {
-    errors.email = 'Email la bat buoc.'
+    errors.email = 'Email là bắt buộc.'
     return false
   }
 
   if (!/^[^\s@]+@gmail\.com$/.test(email)) {
-    errors.email = 'Email phai dung dinh dang ...@gmail.com'
+    errors.email = 'Email phải đúng định dạng ...@gmail.com'
     return false
   }
 
@@ -178,12 +178,12 @@ const validatePhone = () => {
   const digits = String(customer.phone || '').replace(/\D/g, '')
 
   if (!digits) {
-    errors.phone = 'So dien thoai la bat buoc.'
+    errors.phone = 'Số điện thoại là bắt buộc.'
     return false
   }
 
   if (digits.length < 9 || digits.length > 11) {
-    errors.phone = 'So dien thoai phai tu 9 den 11 so.'
+    errors.phone = 'Số điện thoại phải từ 9 đến 11 số.'
     return false
   }
 
@@ -258,10 +258,10 @@ const confirmBooking = async () => {
   if (paymentMethod.value === 'bank') {
     const created = await upsertBookingToBackend(bookingData, 'pending')
     if (!created.ok) {
-      const message = created?.payload?.message || 'Khong the tao lich dat phong vi trung lich hoac loi server.'
+      const message = created?.payload?.message || 'Không thể tạo lịch đặt phòng vì trùng lịch hoặc lỗi server.'
       const suggestions = Array.isArray(created?.payload?.suggestions) ? created.payload.suggestions : []
       const suggestionText = suggestions.length > 0
-        ? `\nPhong de xuat: ${suggestions.map((item) => item.roomName).join(', ')}`
+        ? `\nPhòng đề xuất: ${suggestions.map((item) => item.roomName).join(', ')}`
         : ''
       alert(`${message}${suggestionText}`)
       return
@@ -274,10 +274,10 @@ const confirmBooking = async () => {
 
   const created = await upsertBookingToBackend(bookingData, 'success')
   if (!created.ok) {
-    const message = created?.payload?.message || 'Khong the tao lich dat phong vi trung lich hoac loi server.'
+    const message = created?.payload?.message || 'Không thể tạo lịch đặt phòng vì trùng lịch hoặc lỗi server.'
     const suggestions = Array.isArray(created?.payload?.suggestions) ? created.payload.suggestions : []
     const suggestionText = suggestions.length > 0
-      ? `\nPhong de xuat: ${suggestions.map((item) => item.roomName).join(', ')}`
+      ? `\nPhòng đề xuất: ${suggestions.map((item) => item.roomName).join(', ')}`
       : ''
     alert(`${message}${suggestionText}`)
     return

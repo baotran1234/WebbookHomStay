@@ -8,7 +8,7 @@
             v-for="(img, index) in detailImages"
             :key="`${img}-${index}`"
             :src="getImageUrl(img, store.productid ? store.productid.hinh : 'mau.png')"
-            :alt="`Anh phong ${index + 1}`"
+            :alt="`Ảnh phòng ${index + 1}`"
             :class="{ active: activeImage === img }"
             @click="setActiveImage(img)"
           />
@@ -17,10 +17,10 @@
 
       <div class="info-box">
         <h1>{{ store.productid.tensp }}</h1>
-        <p class="price">{{ formatPrice(store.productid.gia) }} / dem</p>
+        <p class="price">{{ formatPrice(store.productid.gia) }} / đêm</p>
         <p class="desc">{{ store.productid.mota }}</p>
         <div class="selection" v-if="utilityList.length">
-          <label>Tien ich:</label>
+          <label>Tiện ích:</label>
           <div class="utility-grid">
             <div v-for="utility in utilityList" :key="utility.id" class="utility-item">
               <span class="utility-dot"></span>
@@ -46,11 +46,11 @@
           </div> -->
           <div class="date-row">
             <label class="date-field">
-              <span>Ngay vao</span>
+              <span>Ngày vào</span>
               <input class="date-input" type="date" v-model="selectedDate" @change="refreshAvailability" />
             </label>
             <label v-if="checkoutDateLabel" class="date-field">
-              <span>Ngay ra</span>
+              <span>Ngày ra</span>
               <input class="date-input readonly" type="text" :value="checkoutDateLabel" readonly />
             </label>
           </div>
@@ -61,8 +61,8 @@
             <label>Chọn Khung Giờ Vào:</label>
             <span class="slot-legend">{{ selectedPackageLabel }}</span>
           </div>
-          <!-- <p class="slot-note helper">Khung gio duoc chia thanh block co dinh, khong chong nhau de ban de chon va admin de theo doi.</p> -->
-          <p v-if="availabilityLoading" class="slot-note">Dang tai khung gio...</p>
+          <!-- <p class="slot-note helper">Khung giờ được chia thành block cố định, không chồng nhau để bạn dễ chọn và admin dễ theo dõi.</p> -->
+          <p v-if="availabilityLoading" class="slot-note">Đang tải khung giờ...</p>
           <p v-else-if="availabilityError" class="slot-note error">{{ availabilityError }}</p>
           <div class="slot-grid">
             <button
@@ -83,7 +83,7 @@
         </div>
 
         <div class="selection">
-          <label>Phu thu:</label>
+          <label>Phụ thu:</label>
           <div class="addon-grid">
             <label v-for="t in surchargeOptions" :key="`surcharge-${t.id}`" class="addon-item">
               <input type="radio" :value="t.id" v-model="selectedSurcharges" />
@@ -93,7 +93,7 @@
         </div>
 
         <div class="qty-wrap">
-          <label>So luong phong:</label>
+          <label>Số lượng phòng:</label>
           <div class="qty-control">
             <button type="button" @click="changeQuantity(-1)">-</button>
             <input type="number" min="1" v-model.number="quantity" />
@@ -101,16 +101,16 @@
           </div>
         </div>
 
-        <div class="total">Tong tien: <strong>{{ formatPrice(totalPrice) }}</strong></div>
+        <div class="total">Tổng tiền: <strong>{{ formatPrice(totalPrice) }}</strong></div>
 
         <div class="actions">
-          <button type="button" class="outline" @click="addToCart">Them vao gio</button>
+          <button type="button" class="outline" @click="addToCart">Thêm vào giỏ</button>
           <button type="button" class="solid" @click="buyNow">Đặt ngay</button>
         </div>
       </div>
 
       <div class="alternative-section" v-if="alternativeRooms.length">
-          <label>Lua chon khac:</label>
+          <label>Lựa chọn khác:</label>
           <div class="alternative-grid">
             <button
               v-for="room in alternativeRooms"
@@ -121,7 +121,7 @@
             >
               <img :src="getImageUrl(room.hinh)" :alt="room.tensp" />
               <span class="alternative-name">{{ room.tensp }}</span>
-              <span class="alternative-price">{{ formatPrice(room.gia) }} / dem</span>
+              <span class="alternative-price">{{ formatPrice(room.gia) }} / đêm</span>
               <span class="sale-badge">Deal -10%</span>
             </button>
           </div>
@@ -171,7 +171,7 @@ const detailImages = computed(() => {
 
 const activeImage = computed(() => selectedImage.value || store.productid?.hinh || '')
 
-const formatPrice = (value) => `${Number(value || 0).toLocaleString('vi-VN')} d`
+const formatPrice = (value) => `${Number(value || 0).toLocaleString('vi-VN')} đ`
 
 const getImageUrl = (image, fallbackImage = 'mau.png') => {
   try {
@@ -336,7 +336,7 @@ const refreshAvailability = async () => {
   try {
     const response = await fetch(`${ROOM_API_BASE}/rooms/${encodeURIComponent(store.productid.id)}/availability?date=${encodeURIComponent(selectedDate.value)}`)
     if (!response.ok) {
-      throw new Error('Khong tai duoc khung gio.')
+      throw new Error('Không tải được khung giờ.')
     }
 
     const payload = await response.json()
@@ -350,7 +350,7 @@ const refreshAvailability = async () => {
     }
   } catch (_error) {
     availability.value = { occupiedRanges: [] }
-    availabilityError.value = 'Khong tai duoc khung gio. Vui long thu lai.'
+    availabilityError.value = 'Không tải được khung giờ. Vui lòng thử lại.'
   } finally {
     availabilityLoading.value = false
   }
@@ -379,7 +379,7 @@ const buildCartItem = () => {
     startAt: selectedSlot.value.startAt,
     endAt: selectedSlot.value.endAt,
     slotLabel: selectedSlot.value.label,
-    size: currentSize.value?.tensize || 'Tieu chuan',
+    size: currentSize.value?.tensize || 'Tiêu chuẩn',
     toppings: toppingNames,
     price: Number(totalPrice.value) / Math.max(1, Number(quantity.value || 1)),
     quantity: Math.max(1, Number(quantity.value || 1)),

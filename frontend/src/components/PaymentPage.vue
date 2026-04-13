@@ -1,38 +1,38 @@
 <template>
   <section class="payment-page">
     <div class="payment-card" v-if="booking">
-      <h1>Thanh toan QR</h1>
-      <p class="subtitle">Quet ma QR va chuyen khoan dung noi dung de he thong doi soat tu dong.</p>
+      <h1>Thanh toán QR</h1>
+      <p class="subtitle">Quét mã QR và chuyển khoản đúng nội dung để hệ thống đối soát tự động.</p>
 
       <div class="payment-grid">
         <div class="qr-wrap">
-          <img v-if="qrImage" :src="qrImage" alt="Ma QR thanh toan" class="qr-image" />
-          <p v-else class="qr-placeholder">Dang tao ma QR...</p>
+          <img v-if="qrImage" :src="qrImage" alt="Mã QR thanh toán" class="qr-image" />
+          <p v-else class="qr-placeholder">Đang tạo mã QR...</p>
         </div>
 
         <div class="payment-info">
-          <p><span>Ngan hang:</span> <strong>{{ bankInfo.bankName || 'Dang cap nhat' }}</strong></p>
-          <p><span>Chu tai khoan:</span> <strong>{{ bankInfo.accountName || 'Dang cap nhat' }}</strong></p>
-          <p><span>So tai khoan:</span> <strong>{{ bankInfo.accountNo || 'Dang cap nhat' }}</strong></p>
-          <p><span>Ma don hang:</span> <strong>{{ booking.orderId }}</strong></p>
-          <p><span>Ma thanh toan:</span> <strong>{{ paymentIntentId }}</strong></p>
-          <p><span>So tien:</span> <strong>{{ formatPrice(booking.totalAmount) }}</strong></p>
-          <p><span>Noi dung CK:</span> <strong>{{ transferContent || booking.orderId }}</strong></p>
-          <p><span>Het han:</span> <strong>{{ expiresAtText }}</strong></p>
-          <p><span>Khach hang:</span> <strong>{{ getCustomerName() }}</strong></p>
+          <p><span>Ngân hàng:</span> <strong>{{ bankInfo.bankName || 'Đang cập nhật' }}</strong></p>
+          <p><span>Chủ tài khoản:</span> <strong>{{ bankInfo.accountName || 'Đang cập nhật' }}</strong></p>
+          <p><span>Số tài khoản:</span> <strong>{{ bankInfo.accountNo || 'Đang cập nhật' }}</strong></p>
+          <p><span>Mã đơn hàng:</span> <strong>{{ booking.orderId }}</strong></p>
+          <p><span>Mã thanh toán:</span> <strong>{{ paymentIntentId }}</strong></p>
+          <p><span>Số tiền:</span> <strong>{{ formatPrice(booking.totalAmount) }}</strong></p>
+          <p><span>Nội dung CK:</span> <strong>{{ transferContent || booking.orderId }}</strong></p>
+          <p><span>Hết hạn:</span> <strong>{{ expiresAtText }}</strong></p>
+          <p><span>Khách hàng:</span> <strong>{{ getCustomerName() }}</strong></p>
           <p><span>Email:</span> <strong>{{ getCustomerEmail() }}</strong></p>
-          <p><span>So dien thoai:</span> <strong>{{ getCustomerPhone() }}</strong></p>
-          <p><span>Trang thai:</span> <strong>{{ paymentStatusText }}</strong></p>
+          <p><span>Số điện thoại:</span> <strong>{{ getCustomerPhone() }}</strong></p>
+          <p><span>Trạng thái:</span> <strong>{{ paymentStatusText }}</strong></p>
         </div>
       </div>
 
       <div class="hint-box">
-        He thong dang cho webhook/xac nhan tu cong thanh toan. Neu giao dich dung so tien va dung ma don, trang thai se tu dong chuyen sang thanh cong.
+        Hệ thống đang chờ webhook/xác nhận từ cổng thanh toán. Nếu giao dịch đúng số tiền và đúng mã đơn, trạng thái sẽ tự động chuyển sang thành công.
       </div>
 
       <div class="actions">
-        <button type="button" class="primary" @click="refreshIntent">Lam moi QR</button>
-        <button type="button" class="secondary" @click="goBackCart">Quay lai gio hang</button>
+        <button type="button" class="primary" @click="refreshIntent">Làm mới QR</button>
+        <button type="button" class="secondary" @click="goBackCart">Quay lại giỏ hàng</button>
       </div>
     </div>
   </section>
@@ -57,7 +57,7 @@ const cartStore = useCartStore()
 const booking = ref(null)
 const paymentStatus = ref('pending')
 const backendHealthy = ref(true)
-const paymentIntentId = ref('Dang tao')
+const paymentIntentId = ref('Đang tạo')
 const transferContent = ref('')
 const qrImage = ref('')
 const bankInfo = ref({})
@@ -65,36 +65,36 @@ const expiresAt = ref(null)
 let paymentWatcher = null
 
 const expiresAtText = computed(() => {
-  if (!expiresAt.value) return 'Dang cap nhat'
+  if (!expiresAt.value) return 'Đang cập nhật'
   const date = new Date(expiresAt.value)
-  if (Number.isNaN(date.getTime())) return 'Dang cap nhat'
+  if (Number.isNaN(date.getTime())) return 'Đang cập nhật'
   return date.toLocaleString('vi-VN')
 })
 
-const formatPrice = (value) => `${Number(value || 0).toLocaleString('vi-VN')} d`
+const formatPrice = (value) => `${Number(value || 0).toLocaleString('vi-VN')} đ`
 
 const getCustomerName = () => {
-  if (!booking.value || !booking.value.customer) return 'Khach le'
-  return booking.value.customer.name || 'Khach le'
+  if (!booking.value || !booking.value.customer) return 'Khách lẻ'
+  return booking.value.customer.name || 'Khách lẻ'
 }
 
 const getCustomerEmail = () => {
-  if (!booking.value || !booking.value.customer) return 'Khong co'
-  return booking.value.customer.email || 'Khong co'
+  if (!booking.value || !booking.value.customer) return 'Không có'
+  return booking.value.customer.email || 'Không có'
 }
 
 const getCustomerPhone = () => {
-  if (!booking.value || !booking.value.customer) return 'Khong co'
-  return booking.value.customer.fullPhone || booking.value.customer.phone || 'Khong co'
+  if (!booking.value || !booking.value.customer) return 'Không có'
+  return booking.value.customer.fullPhone || booking.value.customer.phone || 'Không có'
 }
 
 const paymentStatusText = computed(() => {
-  if (paymentStatus.value === 'success') return 'Thanh toan thanh cong'
-  if (paymentStatus.value === 'expired') return 'Ma QR het han. Vui long tao lai.'
-  if (paymentStatus.value === 'invalid') return 'Giao dich khong hop le'
-  if (paymentStatus.value === 'waiting') return 'Dang cho xac nhan giao dich'
-  if (!backendHealthy.value) return 'Khong ket noi duoc backend thanh toan'
-  return 'Dang cho xac nhan giao dich'
+  if (paymentStatus.value === 'success') return 'Thanh toán thành công'
+  if (paymentStatus.value === 'expired') return 'Mã QR hết hạn. Vui lòng tạo lại.'
+  if (paymentStatus.value === 'invalid') return 'Giao dịch không hợp lệ'
+  if (paymentStatus.value === 'waiting') return 'Đang chờ xác nhận giao dịch'
+  if (!backendHealthy.value) return 'Không kết nối được backend thanh toán'
+  return 'Đang chờ xác nhận giao dịch'
 })
 
 const finalizePayment = (transactionData) => {
@@ -165,7 +165,7 @@ const createPaymentIntent = async () => {
     const data = await response.json()
     const payment = data?.payment || {}
 
-    paymentIntentId.value = payment.paymentId || 'Dang tao'
+    paymentIntentId.value = payment.paymentId || 'Đang tạo'
     transferContent.value = payment.transferContent || booking.value.orderId
     qrImage.value = payment.qrImageUrl || ''
     bankInfo.value = payment.bankInfo || {}

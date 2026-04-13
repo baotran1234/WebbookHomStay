@@ -16,151 +16,157 @@
         <button class="refresh-btn" type="button" @click="loadDashboard">Làm mới dữ liệu</button>
       </div>
 
+      <div class="tabs-nav">
+        <button 
+          v-for="tab in tabs" 
+          :key="tab.id"
+          class="tab-btn"
+          :class="{ active: activeTab === tab.id }"
+          @click="activeTab = tab.id"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
+
       <p v-if="errorMessage" class="error-box">{{ errorMessage }}</p>
 
-      <div class="kpi-grid" v-if="dashboard">
-        <article class="kpi-card">
-          <h3>Tổng booking</h3>
-          <strong>{{ dashboard.totals.bookings }}</strong>
-        </article>
-        <article class="kpi-card">
-          <h3>Đang chờ thanh toán</h3>
-          <strong>{{ dashboard.totals.pendingPayment }}</strong>
-        </article>
-        <article class="kpi-card">
-          <h3>Doanh thu tuần</h3>
-          <strong>{{ formatMoney(dashboard.totals.revenueWeek) }}</strong>
-        </article>
-        <article class="kpi-card">
-          <h3>Doanh thu tháng</h3>
-          <strong>{{ formatMoney(dashboard.totals.revenueMonth) }}</strong>
-        </article>
-        <article class="kpi-card warning">
-          <h3>Cảnh báo trùng lịch</h3>
-          <strong>{{ dashboard.totals.conflicts }}</strong>
-        </article>
+      <!-- Tab 1: Tổng quan (Overview) -->
+      <div v-show="activeTab === 'overview'" class="tab-content">
+        <div class="kpi-grid" v-if="dashboard">
+          <article class="kpi-card">
+            <h3>Tổng booking</h3>
+            <strong>{{ dashboard.totals.bookings }}</strong>
+          </article>
+          <article class="kpi-card">
+            <h3>Đang chờ thanh toán</h3>
+            <strong>{{ dashboard.totals.pendingPayment }}</strong>
+          </article>
+          <article class="kpi-card">
+            <h3>Doanh thu tuần</h3>
+            <strong>{{ formatMoney(dashboard.totals.revenueWeek) }}</strong>
+          </article>
+          <article class="kpi-card">
+            <h3>Doanh thu tháng</h3>
+            <strong>{{ formatMoney(dashboard.totals.revenueMonth) }}</strong>
+          </article>
+          <article class="kpi-card warning">
+            <h3>Cảnh báo trùng lịch</h3>
+            <strong>{{ dashboard.totals.conflicts }}</strong>
+          </article>
+        </div>
       </div>
 
-      <article class="panel" v-if="dashboard">
-        <div class="board-header">
-          <div>
-            <h2>Bảng khung giờ theo ngày</h2>
-            <p class="note">Đỏ là phòng đang được giữ, trắng là còn trống. Khung giờ chỉ trắng lại khi admin chuyển booking sang Đã trả phòng hoặc Đã hủy.</p>
-          </div>
-          <label class="date-filter">
-            <span>Ngày xem</span>
-            <input type="date" v-model="adminDate" />
-          </label>
-        </div>
-
-        <div class="board-scroll">
-          <div class="board-grid" :style="{ gridTemplateColumns: `180px repeat(${adminSlots.length}, 44px)` }">
-            <div class="board-cell board-head room-head">Phòng</div>
-            <div v-for="slot in adminSlots" :key="slot.startAt" class="board-cell board-head time-head">
-              {{ slot.label }}
+      <!-- Tab 2: Lịch phòng (Schedule) -->
+      <div v-show="activeTab === 'schedule'" class="tab-content">
+        <article class="panel" v-if="dashboard">
+          <div class="board-header">
+            <div>
+              <h2>Bảng khung giờ theo ngày</h2>
+              <p class="note">Đỏ là phòng đang được giữ, trắng là còn trống. Khung giờ chỉ trắng lại khi admin chuyển booking sang Đã trả phòng hoặc Đã hủy.</p>
             </div>
-
-            <div v-for="room in roomBoardRows" :key="`room-${room.roomId}`" class="room-row">
-              <div class="board-cell room-head">{{ room.roomName }}</div>
-              <button
-                v-for="slot in room.slots"
-                :key="`${room.roomId}-${slot.startAt}`"
-                type="button"
-                :disabled="slot.occupied"
-                class="board-cell slot-cell"
-                :class="{ occupied: slot.occupied }"
-                :title="slot.title"
-              >
-                <span>{{ slot.occupied ? 'Đ' : 'T' }}</span>
-              </button>
-            </div>
+            <label class="date-filter">
+              <span>Ngày xem</span>
+              <input type="date" v-model="adminDate" />
+            </label>
           </div>
-        </div>
-      </article>
 
-      <div class="chart-grid" v-if="dashboard">
-        <article class="panel">
-          <h2>Biểu đồ doanh thu 7 ngày gần nhất</h2>
-          <div class="bar-list">
-            <div class="bar-item" v-for="(label, index) in dashboard.charts.week.labels" :key="`week-${label}`">
-              <span class="bar-label">{{ label }}</span>
-              <div class="bar-track">
-                <div class="bar-fill" :style="{ width: `${toPercent(dashboard.charts.week.values[index], weekMax)}%` }"></div>
+          <div class="board-scroll">
+            <div class="board-grid" :style="{ gridTemplateColumns: `180px repeat(${adminSlots.length}, 44px)` }">
+              <div class="board-cell board-head room-head">Phòng</div>
+              <div v-for="slot in adminSlots" :key="slot.startAt" class="board-cell board-head time-head">
+                {{ slot.label }}
               </div>
-              <span class="bar-value">{{ formatMoney(dashboard.charts.week.values[index]) }}</span>
-            </div>
-          </div>
-        </article>
 
-        <article class="panel">
-          <h2>Biểu đồ doanh thu theo tháng</h2>
-          <div class="bar-list">
-            <div class="bar-item" v-for="(label, index) in dashboard.charts.month.labels" :key="`month-${label}`">
-              <span class="bar-label">{{ label }}</span>
-              <div class="bar-track">
-                <div class="bar-fill alt" :style="{ width: `${toPercent(dashboard.charts.month.values[index], monthMax)}%` }"></div>
+              <div v-for="room in roomBoardRows" :key="`room-${room.roomId}`" class="room-row">
+                <div class="board-cell room-head">{{ room.roomName }}</div>
+                <button
+                  v-for="slot in room.slots"
+                  :key="`${room.roomId}-${slot.startAt}`"
+                  type="button"
+                  :disabled="slot.occupied"
+                  class="board-cell slot-cell"
+                  :class="{ occupied: slot.occupied }"
+                  :title="slot.title"
+                >
+                  <span>{{ slot.occupied ? 'Đ' : 'T' }}</span>
+                </button>
               </div>
-              <span class="bar-value">{{ formatMoney(dashboard.charts.month.values[index]) }}</span>
             </div>
           </div>
         </article>
       </div>
 
-      <article class="panel" v-if="dashboard && dashboard.conflicts && dashboard.conflicts.length">
-        <h2>Các booking đang trùng lịch</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Phòng</th>
-              <th>Đơn 1</th>
-              <th>Đơn 2</th>
-              <th>Từ</th>
-              <th>Đến</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(conflict, index) in dashboard.conflicts" :key="`conflict-${index}`">
-              <td>{{ conflict.roomName }}</td>
-              <td>{{ conflict.firstOrderId }}</td>
-              <td>{{ conflict.secondOrderId }}</td>
-              <td>{{ formatDate(conflict.firstStartAt) }}</td>
-              <td>{{ formatDate(conflict.secondEndAt) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </article>
+      <!-- Tab 3: Thống kê (Analytics) -->
+      <div v-show="activeTab === 'analytics'" class="tab-content">
+        <div class="chart-grid" v-if="dashboard">
+          <article class="panel">
+            <h2>Biểu đồ doanh thu 7 ngày gần nhất</h2>
+            <div class="bar-list">
+              <div class="bar-item" v-for="(label, index) in dashboard.charts.week.labels" :key="`week-${label}`">
+                <span class="bar-label">{{ label }}</span>
+                <div class="bar-track">
+                  <div class="bar-fill" :style="{ width: `${toPercent(dashboard.charts.week.values[index], weekMax)}%` }"></div>
+                </div>
+                <span class="bar-value">{{ formatMoney(dashboard.charts.week.values[index]) }}</span>
+              </div>
+            </div>
+          </article>
 
-      <article class="panel" v-if="dashboard">
-        <h2>Lịch sử dụng theo từng phòng</h2>
-        <p class="note">Mỗi dòng là một khung thời gian đã giữ phòng. Dùng bảng này để tránh xếp lịch bị chồng lấn.</p>
-        <div class="timeline-room" v-for="room in dashboard.roomTimeline" :key="`room-${room.roomId}`">
-          <h3>{{ room.roomName }} (Mã phòng: {{ room.roomId }})</h3>
+          <article class="panel">
+            <h2>Biểu đồ doanh thu theo tháng</h2>
+            <div class="bar-list">
+              <div class="bar-item" v-for="(label, index) in dashboard.charts.month.labels" :key="`month-${label}`">
+                <span class="bar-label">{{ label }}</span>
+                <div class="bar-track">
+                  <div class="bar-fill alt" :style="{ width: `${toPercent(dashboard.charts.month.values[index], monthMax)}%` }"></div>
+                </div>
+                <span class="bar-value">{{ formatMoney(dashboard.charts.month.values[index]) }}</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- Tab 4: Danh sách booking (Bookings) -->
+      <div v-show="activeTab === 'bookings'" class="tab-content">
+        <article class="panel" v-if="bookings.length">
+          <h2>Danh sách booking gần đây</h2>
           <table class="table">
             <thead>
               <tr>
+                <th>Mã booking</th>
                 <th>Mã đơn</th>
-                <th>Khách</th>
-                <th>Khung giờ</th>
-                <th>Từ giờ</th>
-                <th>Đến giờ</th>
-                <th>Trạng thái</th>
+                <th>Khách hàng</th>
+                <th>Tổng tiền</th>
+                <th>Thanh toán</th>
+                <th>Trạng thái vận hành</th>
+                <th>Cập nhật</th>
                 <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="schedule in room.schedules" :key="`${schedule.bookingId}-${schedule.startAt}`">
-                <td>{{ schedule.orderId }}</td>
-                <td>{{ schedule.customerName || 'Khách lẻ' }}</td>
-                <td>{{ formatSlotRange(schedule.startAt, schedule.endAt) }}</td>
-                <td>{{ formatDate(schedule.startAt) }}</td>
-                <td>{{ formatDate(schedule.endAt) }}</td>
-                <td>{{ toBookingStatusLabel(schedule.status) }} / {{ toPaymentStatusLabel(schedule.paymentStatus) }}</td>
+              <tr v-for="booking in bookings" :key="booking.bookingId">
+                <td>{{ booking.bookingId }}</td>
+                <td>{{ booking.orderId }}</td>
+                <td>{{ booking.customer && booking.customer.name ? booking.customer.name : 'Khách lẻ' }}</td>
+                <td>{{ formatMoney(booking.totalAmount) }}</td>
+                <td>{{ toPaymentStatusLabel(booking.paymentStatus) }}</td>
+                <td>
+                  <select :value="booking.status" @change="onStatusChange(booking.bookingId, $event)">
+                    <option value="pending_payment">Chờ thanh toán</option>
+                    <option value="pending_confirmation">Chờ admin xác nhận</option>
+                    <option value="checked_in">Đã nhận phòng</option>
+                    <option value="checked_out">Đã trả phòng</option>
+                    <option value="cancelled">Đã hủy</option>
+                  </select>
+                </td>
+                <td>{{ formatDate(booking.updatedAt || booking.createdAt) }}</td>
                 <td>
                   <button
-                    v-if="canDeleteBooking(schedule)"
+                    v-if="canDeleteBooking(booking)"
                     type="button"
                     class="delete-btn"
-                    @click="deleteBooking(schedule.bookingId)"
+                    @click="deleteBooking(booking.bookingId)"
                   >
                     Xóa
                   </button>
@@ -168,55 +174,76 @@
               </tr>
             </tbody>
           </table>
-        </div>
-      </article>
+        </article>
+      </div>
 
-      <article class="panel" v-if="bookings.length">
-        <h2>Danh sách booking gần đây</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Mã booking</th>
-              <th>Mã đơn</th>
-              <th>Khách hàng</th>
-              <th>Tổng tiền</th>
-              <th>Thanh toán</th>
-              <th>Trạng thái vận hành</th>
-              <th>Cập nhật</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="booking in bookings" :key="booking.bookingId">
-              <td>{{ booking.bookingId }}</td>
-              <td>{{ booking.orderId }}</td>
-              <td>{{ booking.customer && booking.customer.name ? booking.customer.name : 'Khách lẻ' }}</td>
-              <td>{{ formatMoney(booking.totalAmount) }}</td>
-              <td>{{ toPaymentStatusLabel(booking.paymentStatus) }}</td>
-              <td>
-                <select :value="booking.status" @change="onStatusChange(booking.bookingId, $event)">
-                  <option value="pending_payment">Chờ thanh toán</option>
-                  <option value="pending_confirmation">Chờ admin xác nhận</option>
-                  <option value="checked_in">Đã nhận phòng</option>
-                  <option value="checked_out">Đã trả phòng</option>
-                  <option value="cancelled">Đã hủy</option>
-                </select>
-              </td>
-              <td>{{ formatDate(booking.updatedAt || booking.createdAt) }}</td>
-              <td>
-                <button
-                  v-if="canDeleteBooking(booking)"
-                  type="button"
-                  class="delete-btn"
-                  @click="deleteBooking(booking.bookingId)"
-                >
-                  Xóa
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </article>
+      <!-- Tab 5: Lịch sử (History) -->
+      <div v-show="activeTab === 'history'" class="tab-content">
+        <article class="panel" v-if="dashboard && dashboard.conflicts && dashboard.conflicts.length">
+          <h2>Các booking đang trùng lịch</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Phòng</th>
+                <th>Đơn 1</th>
+                <th>Đơn 2</th>
+                <th>Từ</th>
+                <th>Đến</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(conflict, index) in dashboard.conflicts" :key="`conflict-${index}`">
+                <td>{{ conflict.roomName }}</td>
+                <td>{{ conflict.firstOrderId }}</td>
+                <td>{{ conflict.secondOrderId }}</td>
+                <td>{{ formatDate(conflict.firstStartAt) }}</td>
+                <td>{{ formatDate(conflict.secondEndAt) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="panel" v-if="dashboard">
+          <h2>Lịch sử dụng theo từng phòng</h2>
+          <p class="note">Mỗi dòng là một khung thời gian đã giữ phòng. Dùng bảng này để tránh xếp lịch bị chồng lấn.</p>
+          <div class="timeline-room" v-for="room in dashboard.roomTimeline" :key="`room-${room.roomId}`">
+            <h3>{{ room.roomName }} (Mã phòng: {{ room.roomId }})</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Khách</th>
+                  <th>Khung giờ</th>
+                  <th>Từ giờ</th>
+                  <th>Đến giờ</th>
+                  <th>Trạng thái</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="schedule in room.schedules" :key="`${schedule.bookingId}-${schedule.startAt}`">
+                  <td>{{ schedule.orderId }}</td>
+                  <td>{{ schedule.customerName || 'Khách lẻ' }}</td>
+                  <td>{{ formatSlotRange(schedule.startAt, schedule.endAt) }}</td>
+                  <td>{{ formatDate(schedule.startAt) }}</td>
+                  <td>{{ formatDate(schedule.endAt) }}</td>
+                  <td>{{ toBookingStatusLabel(schedule.status) }} / {{ toPaymentStatusLabel(schedule.paymentStatus) }}</td>
+                  <td>
+                    <button
+                      v-if="canDeleteBooking(schedule)"
+                      type="button"
+                      class="delete-btn"
+                      @click="deleteBooking(schedule.bookingId)"
+                    >
+                      Xóa
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </div>
     </template>
   </section>
 
@@ -246,7 +273,16 @@ const dashboard = ref(null)
 const bookings = ref([])
 const errorMessage = ref('')
 const showAuth = ref(false)
+const activeTab = ref('overview')
 let dashboardRefreshTimer = null
+
+const tabs = [
+  { id: 'overview', label: 'Tổng quan' },
+  { id: 'schedule', label: 'Lịch phòng' },
+  { id: 'analytics', label: 'Thống kê' },
+  { id: 'bookings', label: 'Danh sách booking' },
+  { id: 'history', label: 'Lịch sử' },
+]
 const adminDate = ref((() => {
   const now = new Date()
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
@@ -754,6 +790,60 @@ onBeforeUnmount(() => {
   background: #552024;
 }
 
+.tabs-nav {
+  display: flex;
+  gap: 12px;
+  background: linear-gradient(180deg, rgba(16,38,59,0.8) 0%, rgba(16,38,59,0.6) 100%);
+  padding: 16px 20px;
+  border-bottom: 2px solid #2a3448;
+  flex-wrap: wrap;
+  border-radius: 12px 12px 0 0;
+  backdrop-filter: blur(8px);
+}
+
+.tab-btn {
+  background: rgba(20, 30, 46, 0.5);
+  border: 1px solid rgba(74, 94, 123, 0.4);
+  color: #a8b8d3;
+  padding: 14px 20px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  text-transform: capitalize;
+}
+
+.tab-btn:hover {
+  background: rgba(30, 46, 66, 0.7);
+  color: #d7e1f7;
+  border-color: rgba(74, 94, 123, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(247, 233, 204, 0.1);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #f7e9cc 0%, #d7b06d 100%);
+  color: #0b1a29;
+  border-color: #f7e9cc;
+  box-shadow: 0 6px 20px rgba(247, 233, 204, 0.25);
+  font-weight: 800;
+}
+
+.tab-content {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 900px) {
   .chart-grid {
     grid-template-columns: 1fr;
@@ -766,6 +856,16 @@ onBeforeUnmount(() => {
   .board-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .tabs-nav {
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .tab-btn {
+    padding: 11px 14px;
+    font-size: 13px;
   }
 }
 </style>
