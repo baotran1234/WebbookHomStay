@@ -272,7 +272,7 @@ const confirmBooking = async () => {
     return
   }
 
-  const created = await upsertBookingToBackend(bookingData, 'success')
+  const created = await upsertBookingToBackend(bookingData, 'pending')
   if (!created.ok) {
     const message = created?.payload?.message || 'Không thể tạo lịch đặt phòng vì trùng lịch hoặc lỗi server.'
     const suggestions = Array.isArray(created?.payload?.suggestions) ? created.payload.suggestions : []

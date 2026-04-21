@@ -379,7 +379,7 @@ function buildBookingRecord(payload) {
   const totalAmount = Number(payload.totalAmount || 0)
   const createdAt = normalizeString(payload.createdAt) || nowIso()
   const paymentMethod = normalizeString(payload.paymentMethod || 'cash')
-  const paymentStatus = normalizeStatus(payload.paymentStatus || (paymentMethod === 'bank' ? 'pending' : 'success'))
+  const paymentStatus = normalizeStatus(payload.paymentStatus || 'pending')
 
   const normalizedItems = items.map((item, index) => {
     const roomId = Number(item.id || item.roomId || 0)
@@ -531,6 +531,7 @@ function getRoomAvailability(roomId, dateKey) {
         bookingId: booking.bookingId,
         orderId: booking.orderId,
         customerName: booking.customer?.name || '',
+        paymentMethod: booking.paymentMethod,
         paymentStatus: booking.paymentStatus,
         status: booking.status,
         startAt,
@@ -1091,6 +1092,7 @@ app.patch('/api/admin/bookings/:bookingId/status', async (req, res) => {
     const updated = {
       ...current,
       status: nextStatus,
+      paymentStatus: nextStatus === 'checked_in' ? 'success' : current.paymentStatus,
       updatedAt: nowIso(),
     }
     store.bookings[index] = updated
@@ -1174,6 +1176,7 @@ app.get('/api/admin/dashboard', (_req, res) => {
         startAt: line.startAt,
         endAt: line.endAt,
         status: booking.status,
+        paymentMethod: booking.paymentMethod,
         paymentStatus: booking.paymentStatus,
         customerName: booking.customer?.name || '',
       })

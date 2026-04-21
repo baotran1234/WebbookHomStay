@@ -27,7 +27,15 @@
         </select>
       </div>
 
-      <div class="room-grid">
+      <p v-if="store.loadingProducts" class="status-note">
+        Dang tai du lieu phong...
+      </p>
+
+      <p v-else-if="store.error" class="status-note error-note">
+        Khong tai duoc du lieu. Kiem tra backend o cong 3010. Chi tiet: {{ store.error }}
+      </p>
+
+      <div v-else class="room-grid">
         <article class="room-card" v-for="room in filteredRooms" :key="room.id" @click="goToDetail(room.id)">
           <img :src="getImageUrl(room.hinh)" :alt="room.tensp" />
           <div class="room-content">
@@ -40,7 +48,7 @@
         </article>
       </div>
 
-      <p v-if="filteredRooms.length === 0" class="empty-note">
+      <p v-if="!store.loadingProducts && !store.error && filteredRooms.length === 0" class="empty-note">
         Không tìm thấy phòng phù hợp với bộ lọc hiện tại.
       </p>
     </div>
@@ -82,7 +90,8 @@ const inRange = (price, range) => {
 
 const filteredRooms = computed(() => {
   const keywordLower = keyword.value.toLowerCase()
-  const rooms = store.products.filter((room) => {
+  const sourceRooms = Array.isArray(store.products) ? store.products : []
+  const rooms = sourceRooms.filter((room) => {
     const nameMatched = String(room.tensp || '').toLowerCase().includes(keywordLower)
     const categoryMatched =
       selectedCategory.value === 'all' || String(room.category_id) === String(selectedCategory.value)
@@ -224,6 +233,15 @@ h1 {
 .empty-note {
   margin-top: 14px;
   color: #a5b2c8;
+}
+
+.status-note {
+  margin: 12px 0 0;
+  color: #d9e3f5;
+}
+
+.error-note {
+  color: #ffb7b7;
 }
 
 @media (max-width: 900px) {

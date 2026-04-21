@@ -150,7 +150,7 @@
                 <td>{{ booking.orderId }}</td>
                 <td>{{ booking.customer && booking.customer.name ? booking.customer.name : 'Khách lẻ' }}</td>
                 <td>{{ formatMoney(booking.totalAmount) }}</td>
-                <td>{{ toPaymentStatusLabel(booking.paymentStatus) }}</td>
+                <td>{{ toPaymentStatusLabel(booking) }}</td>
                 <td>
                   <select :value="booking.status" @change="onStatusChange(booking.bookingId, $event)">
                     <option value="pending_payment">Chờ thanh toán</option>
@@ -227,7 +227,7 @@
                   <td>{{ formatSlotRange(schedule.startAt, schedule.endAt) }}</td>
                   <td>{{ formatDate(schedule.startAt) }}</td>
                   <td>{{ formatDate(schedule.endAt) }}</td>
-                  <td>{{ toBookingStatusLabel(schedule.status) }} / {{ toPaymentStatusLabel(schedule.paymentStatus) }}</td>
+                  <td>{{ toBookingStatusLabel(schedule.status) }} / {{ toPaymentStatusLabel(schedule) }}</td>
                   <td>
                     <button
                       v-if="canDeleteBooking(schedule)"
@@ -361,14 +361,32 @@ const formatSlotRange = (startAt, endAt) => {
   return `${startText} - ${endText}`
 }
 
-const toPaymentStatusLabel = (status) => {
+const toPaymentStatusLabel = (bookingOrStatus) => {
+  if (typeof bookingOrStatus === 'object' && bookingOrStatus !== null) {
+    const bookingStatus = String(bookingOrStatus.status || '').toLowerCase()
+    const paymentStatus = String(bookingOrStatus.paymentStatus || '').toLowerCase()
+    const paymentMethod = String(bookingOrStatus.paymentMethod || '').toLowerCase()
+
+    if (bookingStatus === 'cancelled' && paymentMethod === 'bank' && paymentStatus === 'success') {
+      return 'Đang chờ hoàn tiền'
+    }
+
+    const map = {
+      pending: 'Chờ thanh toán',
+      success: 'Đã thanh toán',
+      invalid: 'Thanh toán lỗi',
+      expired: 'Hết hạn',
+    }
+    return map[paymentStatus] || paymentStatus || 'Không rõ'
+  }
+
   const map = {
     pending: 'Chờ thanh toán',
     success: 'Đã thanh toán',
     invalid: 'Thanh toán lỗi',
     expired: 'Hết hạn',
   }
-  return map[String(status || '').toLowerCase()] || String(status || 'Không rõ')
+  return map[String(bookingOrStatus || '').toLowerCase()] || String(bookingOrStatus || 'Không rõ')
 }
 
 const toBookingStatusLabel = (status) => {
@@ -634,16 +652,36 @@ onBeforeUnmount(() => {
 .date-filter {
   display: grid;
   gap: 6px;
-  color: #9db0cf;
+  color: #c9d8f2;
   font-size: 13px;
+  padding: 12px 14px;
+  border: 1px solid #31405a;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #162132 0%, #1b2940 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .date-filter input {
-  background: #121926;
-  border: 1px solid #3a4864;
-  color: #e9f0ff;
-  border-radius: 8px;
-  padding: 8px 10px;
+  min-width: 184px;
+  background: #f7fbff;
+  border: 1px solid #8fb3ea;
+  color: #13294b;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(7, 17, 33, 0.18);
+}
+
+.date-filter input:focus {
+  outline: none;
+  border-color: #4d8fff;
+  box-shadow: 0 0 0 3px rgba(77, 143, 255, 0.24);
+}
+
+.date-filter input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.9;
+  filter: invert(17%) sepia(21%) saturate(1592%) hue-rotate(184deg) brightness(95%) contrast(92%);
 }
 
 .board-scroll {
