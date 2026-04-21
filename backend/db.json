@@ -255,6 +255,42 @@
         "mau4-2.png",
         "mau4-3.png"
       ]
+    },
+    {
+      "id": 9,
+      "tensp": "VIP 04 Phòng Master",
+      "gia": 990000,
+      "category_id": 1,
+      "hinh": "vip4.png",
+      "hinhPhu": [
+        "vip4-1.png",
+        "vip4-2.png",
+        "vip4-3.png"
+      ]
+    },
+    {
+      "id": 10,
+      "tensp": "VIP 05 Phòng Master",
+      "gia": 1090000,
+      "category_id": 2,
+      "hinh": "vip5.png",
+      "hinhPhu": [
+        "vip5-1.png",
+        "vip5-2.png",
+        "vip5-3.png"
+      ]
+    },
+    {
+      "id": 11,
+      "tensp": "VIP 06 Phòng Master",
+      "gia": 1190000,
+      "category_id": 3,
+      "hinh": "vip6.png",
+      "hinhPhu": [
+        "vip6-1.png",
+        "vip6-2.png",
+        "vip6-3.png"
+      ]
     }
   ],
   "sizes": [

@@ -59,7 +59,7 @@
         <router-link to="/products">Xem tat ca</router-link>
       </div>
       <div class="featured-grid">
-        <article class="room-card" v-for="room in vipRooms" :key="`vip-${room.id}`" @click="goToDetail(room.id)">
+        <article class="room-card" v-for="room in pagedVipRooms" :key="`vip-${room.id}`" @click="goToDetail(room.id)">
           <img :src="getImageUrl(room.hinh)" :alt="room.tensp" />
           <div class="room-info">
             <div class="room-top-row">
@@ -72,6 +72,11 @@
             </div>
           </div>
         </article>
+      </div>
+      <div v-if="vipTotalPages > 1" class="vip-pagination">
+        <button v-if="canPrevVipPage" type="button" class="vip-page-btn" @click="goToPrevVipPage">Pre</button>
+        <span class="vip-page-indicator">Trang {{ vipPage }} / {{ vipTotalPages }}</span>
+        <button v-if="canNextVipPage" type="button" class="vip-page-btn" @click="goToNextVipPage">Next</button>
       </div>
     </div>
 
@@ -139,15 +144,27 @@ const heroTrackStyle = computed(() => ({
 
 const saleRooms = computed(() => [...store.products].sort((a, b) => Number(b.id || 0) - Number(a.id || 0)).slice(0, 4))
 
-const VIP_ROOM_IDS = [1, 2, 3]
+const VIP_ROOM_IDS = [1, 2, 3, 9, 10, 11]
 const isVipRoom = (room) => VIP_ROOM_IDS.includes(Number(room?.id || 0))
+const vipPage = ref(1)
+const vipPerPage = 3
 
 const vipRooms = computed(() =>
   store.products
     .filter((room) => isVipRoom(room))
     .sort((a, b) => Number(a.id || 0) - Number(b.id || 0))
-    .slice(0, 4)
 )
+
+const vipTotalPages = computed(() => Math.max(1, Math.ceil(vipRooms.value.length / vipPerPage)))
+
+const pagedVipRooms = computed(() => {
+  const currentPage = Math.min(vipPage.value, vipTotalPages.value)
+  const start = (currentPage - 1) * vipPerPage
+  return vipRooms.value.slice(start, start + vipPerPage)
+})
+
+const canPrevVipPage = computed(() => vipPage.value > 1)
+const canNextVipPage = computed(() => vipPage.value < vipTotalPages.value)
 
 const classicRooms = computed(() =>
   store.products
@@ -174,6 +191,16 @@ const getImageUrl = (image) => {
 
 const goToDetail = (id) => {
   router.push(`/product/${id}`)
+}
+
+const goToPrevVipPage = () => {
+  if (!canPrevVipPage.value) return
+  vipPage.value -= 1
+}
+
+const goToNextVipPage = () => {
+  if (!canNextVipPage.value) return
+  vipPage.value += 1
 }
 
 const nextSlide = () => {
@@ -312,6 +339,38 @@ onBeforeUnmount(() => {
 
 .vip-wrap {
   padding-top: 18px;
+}
+
+.vip-pagination {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.vip-page-btn {
+  min-width: 84px;
+  border: 1px solid #b30077;
+  border-radius: 999px;
+  background: #990066;
+  color: #ffe8f6;
+  padding: 9px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.vip-page-btn:hover {
+  background: #b30077;
+  box-shadow: 0 10px 18px rgba(179, 0, 119, 0.28);
+  transform: translateY(-1px);
+}
+
+.vip-page-indicator {
+  color: #d7e4ff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .classic-wrap {
